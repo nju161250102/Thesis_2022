@@ -2,7 +2,7 @@ import re
 
 import pandas as pd
 
-from data import GitData
+from data import LocalGitData
 from data import JiraData
 from utils import LOG
 
@@ -17,7 +17,7 @@ class DataBuilder(object):
         :param local_path: 本地Git仓库目录
         :param jira_name: jira上的项目名
         """
-        git_data = GitData(local_path)
+        git_data = LocalGitData(local_path)
         jira_data = JiraData(jira_name)
         project_id = jira_data.project_key
         jira_dict = jira_data.issue_data()

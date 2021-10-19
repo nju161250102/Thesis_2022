@@ -3,6 +3,7 @@ from datetime import datetime
 import jira
 
 from utils import LOG
+from Config import Config
 
 
 class JiraData(object):
@@ -10,12 +11,17 @@ class JiraData(object):
     获取jira服务器的数据
     """
 
-    def __init__(self, project_name: str, jira_home="https://issues.apache.org/jira"):
+    def __init__(self):
+        self._jira = jira.JIRA(Config.JIRA_SITE)
+
+    def get_projects(self):
+        return self._jira.projects()
+
+    def search_project(self, project_name: str):
         """
         :param project_name: 项目名：不是全部大写的项目key
-        :param jira_home: jira服务器，默认为apache的
         """
-        client = jira.JIRA(jira_home)
+        client = jira.JIRA(Config.JIRA_SITE)
         for project in client.projects():
             if project.name == project_name:
                 self.project_key = project.key
