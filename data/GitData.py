@@ -1,24 +1,49 @@
 from datetime import datetime
-from typing import List
+import json
+import requests
 
-from pydriller import Repository, Commit
-
+from Config import Config
 from utils import LOG
 
 
 class GitData(object):
     """
-    从git的commit中提取信息
+    使用Api从网络获取Git仓库信息
     """
 
-    def __init__(self, repo_path: str):
+    @staticmethod
+    def filter_projects() -> list:
         """
-        :param repo_path: 本地仓库目录
+        过滤出符合条件的Git项目，按Star数排序
+        返回格式参见 https://docs.github.com/cn/rest/reference/repos#list-repository-languages
+        :return:
         """
-        self._repo = Repository(repo_path, 
-                                to=(datetime(2021, 6, 30)),
-                                only_modifications_with_file_types=[".java"])
-        LOG.info("Git commit log from " + repo_path)
-
-    def log_data(self) -> List[Commit]:
-        return [m for m in self._repo.traverse_commits() if m.in_main_branch]
+        header = {
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": "token " + Config.GIT_TOKEN
+        }
+        result = []
+        req = requests.get(Config.GIT_SITE, headers=header)
+        org_data = json.loads(req.text)
+        page_size = 100
+        for i in range(1, int(org_data["public_repos"] / page_size) + 2):
+            req = requests.get(org_data["repos_url"],  params={"per_page": page_size, "page": i}, headers=header)
+            for repo in json.loads(req.text):
+                # 条件0:项目未被归档
+                if repo["archived"]:
+                    continue
+                # 条件1:主要语言为Java
+                if repo["language"] != "Java":
+                    continue
+                create_time = datetime.strptime(repo["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+                update_time = datetime.strptime(repo["updated_at"], "%Y-%m-%dT%H:%M:%SZ")
+                # 条件2:创建距今大于两年
+                if (datetime.now() - create_time).days < 365 * 2:
+                    continue
+                # 条件3:近一年内有更新
+                if (datetime.now() - update_time).days > 365:
+                    continue
+                result.append(repo)
+        LOG.info("Inclusion of projects:" + str(len(result)))
+        result.sort(key=lambda r: r["stargazers_count"], reverse=True)
+        return result
