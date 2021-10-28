@@ -79,6 +79,8 @@ class GitData(object):
                     page_num += 1
                     all_pages.extend(req_data)
             # 计算时间差，选择最接近的版本
+            if len(all_pages) == 0:
+                continue
             first_date = datetime.strptime(all_pages[0]["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
             last_date = datetime.strptime(all_pages[-1]["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
             first_delta = (first_date - datetime.strptime(datetime_list[i], "%Y-%m-%dT%H:%M:%SZ")).seconds

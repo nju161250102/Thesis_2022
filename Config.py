@@ -8,7 +8,7 @@ class Config(object):
     """
     test_flag = os.path.isdir("/home/qian")
     yaml_file = "/home/qian/config.yaml" if os.path.isdir("/home/qian") else "/home/qianmy/config.yaml"
-    config_data = yaml.load(open(yaml_file))
+    config_data = yaml.safe_load(open(yaml_file))
 
     # 工作目录：程序文件夹位置
     WORKING_DIR = config_data["workingDir"]

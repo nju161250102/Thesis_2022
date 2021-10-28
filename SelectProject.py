@@ -18,11 +18,14 @@ if __name__ == "__main__":
         if repo["name"].upper() in project_dict.keys():
             issues = jira_data.get_issues(repo["name"].upper(), 100)
             LOG.info("{0} issues: {1}".format(repo["name"], len(issues)))
+            # 至少要有100个issue
             if len(issues) == 100:
+                commit_list = GitData.get_interval_commits(repo["url"])
                 result.append({
                     "name": repo["name"],
                     "url": repo["url"],
-                    "default_branch": repo["default_branch"]
+                    "default_branch": repo["default_branch"],
+                    "commit_list": list(map(lambda c: c["sha"], commit_list))
                 })
             if len(result) >= 20:
                 break

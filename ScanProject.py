@@ -6,7 +6,7 @@ import os
 import sys
 
 from Config import Config
-from data import ReportData, GitData
+from data import ReportData
 from utils import LOG
 
 if __name__ == "__main__":
@@ -16,6 +16,5 @@ if __name__ == "__main__":
             if len(sys.argv) > 1 and project["name"] != sys.argv[1]:
                 continue
             LOG.info("Start scan project: " + project["name"])
-            commit_list = GitData.get_interval_commits(project["url"])
-            for index, commit in enumerate(commit_list):
-                ReportData.scan_project(project["name"], commit, index)
+            for index, commit in enumerate(project["commit_list"]):
+                ReportData.scan_project(project["name"], commit["sha"], index)

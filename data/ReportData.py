@@ -1,8 +1,7 @@
 import os
-import subprocess
 
 from Config import Config
-from utils import LOG
+from utils import LOG, CommandUtils
 
 
 class ReportData(object):
@@ -18,13 +17,15 @@ class ReportData(object):
         xml_path = os.path.join(Config.DATA_DIR, "report", "{0}_{1}.xml".format(project_name, version))
         # 切换项目版本
         if commit is None:
-            cmd = "cd {0} && git checkout {1}".format(project_path, conf["default"])
+            CommandUtils.run("git checkout " + conf["default"], project_path)
         else:
-            cmd = "cd {0} && git checkout {1}".format(project_path, commit)
-        LOG.info(cmd)
-        subprocess.call(cmd)
+            CommandUtils.run("git checkout " + commit, project_path)
         # 自动构建
-        subprocess.call(conf["build"])
+        CommandUtils.run(conf["build"], project_path)
         # 扫描漏洞
-        subprocess.call("{0} -textui -jvmArgs \"-Xmx4096m\" -high -sortByClass -xml -output {1} {2}".
-                        format(Config.FINDBUGS_PATH, xml_path, scan_path))
+        CommandUtils.run("{0} -textui -jvmArgs \"-Xmx4096m\" -high -sortByClass -xml -output {1} {2}".
+                         format(Config.FINDBUGS_PATH, xml_path, scan_path))
+
+    @staticmethod
+    def xml_to_csv():
+        pass
