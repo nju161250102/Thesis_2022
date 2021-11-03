@@ -1,7 +1,6 @@
-import os
 import re
+
 import requests
-import shutil
 import wget
 
 from utils import LOG, PathUtils, CommandUtils
@@ -61,14 +60,12 @@ class MavenData(object):
                 versions = config["select"]
             # 未指定时自动选择时间范围内的版本
             else:
-                versions = list(config["versions"].items)
+                versions = list(config["versions"].items())
                 versions.sort(key=lambda v: v[1]["updateTime"])
                 versions = list(map(lambda v: v[0], versions))
             # 重新建立文件夹
-            project_dir = PathUtils.join_path("project", project)
-            if os.path.exists(project_dir):
-                shutil.rmtree(project_dir)
-            os.mkdir(project_dir)
+            project_dir = PathUtils.join_path("project", config["name"])
+            PathUtils.rebuild_dir(project_dir)
             # 遍历下载
             for version in versions:
                 sources_jar = config["versions"][version]["sources"]
@@ -76,6 +73,6 @@ class MavenData(object):
                 wget.download(config["url"] + version + "/" + sources_jar, project_dir)
                 wget.download(config["url"] + version + "/" + target_jar, project_dir)
                 # 解压jar
-                CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.join_path("project", project, version),
-                                                              os.path.join(project_dir, sources_jar)))
-                LOG.info("{0} version {1} done.".format(project, version))
+                CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(config["name"], version),
+                                                              PathUtils.project_path(config["name"], sources_jar)))
+                LOG.info("{0} version {1} done.".format(config["name"], version))
