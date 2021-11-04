@@ -35,15 +35,11 @@ class ReportData(object):
         扫描同一个项目下不同版本的Jar包
         :param config: 项目配置dict
         """
-        if "select" in config.keys():
-            versions = config["select"]
-        else:
-            versions = list(config["versions"].items())
-            versions.sort(key=lambda v: v[1]["updateTime"])
-            versions = list(map(lambda v: v[0], versions))
         PathUtils.rebuild_dir(PathUtils.report_path(config["name"]))
-        for version in versions:
-            target_jar = PathUtils.project_path(config["name"], config["versions"][version]["target"])
+        for version in config["versions"]:
+            if "select" in config.keys() and version not in config["select"]:
+                continue
+            target_jar = PathUtils.project_path(config["name"], version["target"])
             CommandUtils.find_bugs(target_jar, PathUtils.report_path(config["name"], version + ".xml"))
             LOG.info("version: " + version)
 

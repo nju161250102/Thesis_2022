@@ -13,10 +13,14 @@ class MavenData(object):
         """
         搜索仓库路径下各版本的信息
         :param project_url: 必须以 / 结尾
-        :return: 各版本数据
+        :return: 项目对应的配置数据
         """
-        result = {}
+        # 检查路径必须由/结尾
+        if project_url[-1] != "/":
+            LOG.error("URL format error: " + project_url)
+
         project_name = project_url.split("/")[-2]
+        versions = []
         req = requests.get(project_url)
         for match in re.finditer(r"<a(.*?)>(.*?)</a>(.*?)<", req.text, re.DOTALL):
             if match.groups()[2].strip() != "":
@@ -33,7 +37,7 @@ class MavenData(object):
                     # 源码Jar包
                     sources_jar = "{0}-{1}-sources.jar".format(project_name, version)
                     html = requests.get(project_url + path).text
-                    # 精确匹配
+                    # 精确匹配，暂时没写没模糊匹配
                     if target_jar not in html:
                         LOG.warn(target_jar + "not found")
                         target_jar = None
@@ -41,12 +45,19 @@ class MavenData(object):
                         LOG.warn(sources_jar + "not found")
                         sources_jar = None
                     LOG.info(version)
-                    result[version] = {
+                    versions.append({
+                        "number": version,
                         "updateTime": update_time,
                         "sources": sources_jar,
                         "target": target_jar
-                    }
-        return result
+                    })
+        # 按版本发布的日期排序
+        versions.sort(key=lambda v: v["updateTime"])
+        return {
+            "name": project_name,
+            "url": project_url,
+            "versions": versions
+        }
 
     @staticmethod
     def download_all(project_config: dict):
@@ -55,21 +66,16 @@ class MavenData(object):
         :param project_config: 配置信息
         """
         for project, config in project_config.items():
-            # 指定了所选择的版本
-            if "select" in config.keys():
-                versions = config["select"]
-            # 未指定时自动选择时间范围内的版本
-            else:
-                versions = list(config["versions"].items())
-                versions.sort(key=lambda v: v[1]["updateTime"])
-                versions = list(map(lambda v: v[0], versions))
             # 重新建立文件夹
             project_dir = PathUtils.join_path("project", config["name"])
             PathUtils.rebuild_dir(project_dir)
             # 遍历下载
-            for version in versions:
-                sources_jar = config["versions"][version]["sources"]
-                target_jar = config["versions"][version]["target"]
+            for version in config["versions"]:
+                # 指定了需要下载的版本
+                if "select" in config.keys() and version not in config["select"]:
+                    continue
+                sources_jar = version["sources"]
+                target_jar = version["target"]
                 wget.download(config["url"] + version + "/" + sources_jar, project_dir)
                 wget.download(config["url"] + version + "/" + target_jar, project_dir)
                 # 解压jar

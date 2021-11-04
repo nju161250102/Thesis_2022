@@ -30,5 +30,5 @@ class CommandUtils(object):
         :param jar_path: 目标Jar地址
         :param report_path: 扫描报告目标路径
         """
-        CommandUtils.run("{0} -textui -jvmArgs \"-Xmx4096m\" -high -sortByClass -xml -output {1} {2}".
+        CommandUtils.run("{0} -textui -high -sortByClass -xml -output {1} {2}".
                          format(Config.FINDBUGS_PATH, report_path, jar_path))

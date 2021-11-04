@@ -1,13 +1,61 @@
 """
-项目漏洞下载与扫描脚本
+项目下载与扫描脚本
 """
 import json
-import os
+import sys
 
-from Config import Config
 from data import MavenData, ReportData
+from utils import PathUtils
+
+
+# 项目收集配置数据，select标明需要扫描的版本信息
+projects = {
+    "kafka": {
+        "url": "https://repo1.maven.org/maven2/org/apache/kafka/kafka_2.12/",
+        "select": []
+    },
+    # "flink": {
+    #     "url": "https://repo1.maven.org/maven2/org/apache/flink/flink-core/",
+    #     "select": []
+    # },
+    # "hadoop": {
+    #     "url": "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/"
+    # },
+    # "rocketmq": {
+    #     "url": "https://repo1.maven.org/maven2/org/apache/rocketmq/rocketmq-common/"
+    # }
+}
+
+
+def collect():
+    result = {}
+    for p, config in projects:
+        # 获取包含版本信息的配置数据
+        info = MavenData.search_versions(config["url"])
+        # 如果指定了筛选的版本，合并
+        if "select" in config.keys() and len(info["select"]) > 0:
+            info["select"] = config["select"]
+        result[p] = info
+    # 保存json到数据目录
+    with open(PathUtils.join_path("project.json"), "w") as f:
+        f.write(json.dumps(result, indent=4, separators=(',', ':')))
+
+
+def download():
+    with open(PathUtils.join_path("project.json"), "r") as f:
+        MavenData.download_all(json.load(f))
+
+
+def scan():
+    with open(PathUtils.join_path("project.json"), "r") as f:
+        ReportData.scan_all_jar(json.load(f))
+
 
 if __name__ == "__main__":
-    with open(os.path.join(Config.DATA_DIR, "project.json"), "r") as f:
-        MavenData.download_all(json.load(f))
-        ReportData.scan_all_jar(json.load(f))
+    if len(sys.argv) == 2:
+        if sys.argv[1] == "collect":
+            collect()
+        if sys.argv[1] == "download":
+            download()
+        if sys.argv[1] == "scan":
+            scan()
