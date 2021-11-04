@@ -6,30 +6,15 @@ import sys
 
 from data import MavenData, ReportData
 from utils import PathUtils
-
-
-# 项目收集配置数据，select标明需要扫描的版本信息
-projects = {
-    "kafka": {
-        "url": "https://repo1.maven.org/maven2/org/apache/kafka/kafka_2.12/",
-        "select": []
-    },
-    # "flink": {
-    #     "url": "https://repo1.maven.org/maven2/org/apache/flink/flink-core/",
-    #     "select": []
-    # },
-    # "hadoop": {
-    #     "url": "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/"
-    # },
-    # "rocketmq": {
-    #     "url": "https://repo1.maven.org/maven2/org/apache/rocketmq/rocketmq-common/"
-    # }
-}
+from Config import Config
 
 
 def collect():
+    """
+    从Maven仓库中收集项目的版本数据等信息，保存到 project.json 文件
+    """
     result = {}
-    for p, config in projects:
+    for p, config in Config.MAVEN_URL:
         # 获取包含版本信息的配置数据
         info = MavenData.search_versions(config["url"])
         # 如果指定了筛选的版本，合并
@@ -42,11 +27,17 @@ def collect():
 
 
 def download():
+    """
+    依据 project.json 文件下载jar包和源码jar包，并解压源码
+    """
     with open(PathUtils.join_path("project.json"), "r") as f:
         MavenData.download_all(json.load(f))
 
 
 def scan():
+    """
+    依据 project.json 文件扫描相应下载好的jar包
+    """
     with open(PathUtils.join_path("project.json"), "r") as f:
         ReportData.scan_all_jar(json.load(f))
 
