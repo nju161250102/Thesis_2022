@@ -14,11 +14,11 @@ def collect():
     从Maven仓库中收集项目的版本数据等信息，保存到 project.json 文件
     """
     result = {}
-    for p, config in Config.MAVEN_URL:
+    for p, config in Config.MAVEN_URL.items():
         # 获取包含版本信息的配置数据
         info = MavenData.search_versions(config["url"])
         # 如果指定了筛选的版本，合并
-        if "select" in config.keys() and len(info["select"]) > 0:
+        if "select" in config.keys() and len(config["select"]) > 0:
             info["select"] = config["select"]
         result[p] = info
     # 保存json到数据目录

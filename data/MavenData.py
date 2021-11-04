@@ -7,6 +7,9 @@ from utils import LOG, PathUtils, CommandUtils
 
 
 class MavenData(object):
+    """
+    对 Maven 仓库的相关操作
+    """
 
     @staticmethod
     def search_versions(project_url: str):
@@ -22,6 +25,7 @@ class MavenData(object):
         project_name = project_url.split("/")[-2]
         versions = []
         req = requests.get(project_url)
+        LOG.info("Start search project: " + project_name)
         for match in re.finditer(r"<a(.*?)>(.*?)</a>(.*?)<", req.text, re.DOTALL):
             if match.groups()[2].strip() != "":
                 groups = re.search(r"(.+?)( {2,})(.+?)", match.groups()[2].strip()).groups()
@@ -69,6 +73,7 @@ class MavenData(object):
             # 重新建立文件夹
             project_dir = PathUtils.join_path("project", config["name"])
             PathUtils.rebuild_dir(project_dir)
+            LOG.info("Start download project: " + project)
             # 遍历下载
             for version in config["versions"]:
                 # 指定了需要下载的版本

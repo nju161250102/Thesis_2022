@@ -1,33 +1,10 @@
-from Config import Config
 from utils import LOG, CommandUtils, PathUtils
 
 
 class ReportData(object):
-
-    @staticmethod
-    def scan_project(project_name: str, commit=None, version=0):
-        """
-        [废弃] 进入项目文件夹之后切换版本并编译和扫描
-        :param project_name: 项目名称
-        :param commit: 版本SHA
-        :param version: 版本名
-        """
-        if project_name not in Config.SCAN_CONF.keys():
-            LOG.error("{0} not found in config".format(project_name))
-            return
-        conf = Config.SCAN_CONF[project_name]
-        project_path = PathUtils.project_path(project_name)
-        scan_path = PathUtils.project_path(project_name, conf["target"])
-        xml_path = PathUtils.project_path("{0}_{1}.xml".format(project_name, version))
-        # 切换项目版本
-        if commit is None:
-            CommandUtils.run("git checkout " + conf["default"], project_path)
-        else:
-            CommandUtils.run("git checkout " + commit, project_path)
-        # 自动构建
-        CommandUtils.run(conf["build"], project_path)
-        # 扫描漏洞
-        CommandUtils.find_bugs(scan_path, xml_path)
+    """
+    扫描报告的相关操作
+    """
 
     @staticmethod
     def scan_jar(config: dict):
@@ -52,7 +29,3 @@ class ReportData(object):
         for project, project_config in config.items():
             LOG.info("Start scan project: " + project)
             ReportData.scan_jar(project_config)
-
-    @staticmethod
-    def xml_to_csv():
-        pass
