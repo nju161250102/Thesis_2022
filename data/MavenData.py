@@ -77,13 +77,13 @@ class MavenData(object):
             # 遍历下载
             for version in config["versions"]:
                 # 指定了需要下载的版本
-                if "select" in config.keys() and version not in config["select"]:
+                if "select" in config.keys() and version["number"] not in config["select"]:
                     continue
                 sources_jar = version["sources"]
                 target_jar = version["target"]
-                wget.download(config["url"] + version + "/" + sources_jar, project_dir)
-                wget.download(config["url"] + version + "/" + target_jar, project_dir)
+                wget.download(config["url"] + version["number"] + "/" + sources_jar, project_dir)
+                wget.download(config["url"] + version["number"] + "/" + target_jar, project_dir)
                 # 解压jar
-                CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(config["name"], version),
+                CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(config["name"], version["number"]),
                                                               PathUtils.project_path(config["name"], sources_jar)))
-                LOG.info("{0} version {1} done.".format(config["name"], version))
+                LOG.info("{0} version {1} done.".format(config["name"], version["number"]))
