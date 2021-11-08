@@ -26,11 +26,11 @@ def collect():
         if "startDate" in config.keys() and config["startDate"] is not None:
             start_date = datetime.strptime(config["startDate"], "%Y-%m-%d")
             select_versions = list(filter(
-                lambda v: datetime.strptime(v["updateTime"], "%Y-%m-%d %H:%M:%S") >= start_date, select_versions))
+                lambda v: datetime.strptime(v["updateTime"], "%Y-%m-%d %H:%M") >= start_date, select_versions))
         if "endDate" in config.keys() and config["endDate"] is not None:
             end_date = datetime.strptime(config["endDate"], "%Y-%m-%d")
             select_versions = list(filter(
-                lambda v: datetime.strptime(v["updateTime"], "%Y-%m-%d %H:%M:%S") <= end_date, select_versions))
+                lambda v: datetime.strptime(v["updateTime"], "%Y-%m-%d %H:%M") <= end_date, select_versions))
         # 将符合条件的版本号保存
         if len(select_versions) != len(info["versions"]):
             info["select"] = list(map(lambda v: v["number"], select_versions))

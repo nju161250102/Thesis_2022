@@ -1,5 +1,8 @@
 from xml.etree import ElementTree
 
+from typing import List
+
+from model import Alarm
 from utils import LOG, CommandUtils, PathUtils
 
 
@@ -16,11 +19,11 @@ class ReportData(object):
         """
         PathUtils.rebuild_dir(PathUtils.report_path(config["name"]))
         for version in config["versions"]:
-            if "select" in config.keys() and version not in config["select"]:
+            if "select" in config.keys() and version["number"] not in config["select"]:
                 continue
             target_jar = PathUtils.project_path(config["name"], version["target"])
-            CommandUtils.find_bugs(target_jar, PathUtils.report_path(config["name"], version + ".xml"))
-            LOG.info("version: " + version)
+            CommandUtils.find_bugs(target_jar, PathUtils.report_path(config["name"], version["number"] + ".xml"))
+            LOG.info("Scan version finished: " + version["number"])
 
     @staticmethod
     def scan_all_jar(config: dict):
@@ -33,7 +36,7 @@ class ReportData(object):
             ReportData.scan_jar(project_config)
 
     @staticmethod
-    def read_report(project_name: str, version: str) -> list:
+    def read_report(project_name: str, version: str) -> List[Alarm]:
         """
         读取xml报告，获取漏洞列表
         :param project_name: 项目名
@@ -45,29 +48,26 @@ class ReportData(object):
         for item in xml_doc.iterfind("BugInstance"):
             # 保证结果中有漏洞行
             if item.find("SourceLine") is not None:
-                bug = {
-                    "Category": item.get("category"),
-                    "Type": item.get("type"),
-                    "Rank": item.get("rank"),
-                    "Class": item.find("Class").get("classname"),
-                    # 误报标记，-1未知，0误报，1正报
-                    "Label": -1,
-                    "Version": version
-                }
+                alarm = Alarm()
+                alarm.category = item.get("category")
+                alarm.type = item.get("type")
+                alarm.rank = item.get("rank")
+                alarm.class_name = item.find("Class").get("classname")
+                alarm.version = version
                 for method_node in item.findall("Method"):
                     # Method中存在与Class对应的方法，补充信息
-                    if method_node.get("classname") == bug["Class"]:
-                        bug["Method"] = method_node.get("name")
-                        bug["Signature"] = method_node.get("signature")
-                        bug["Start"] = int(method_node.find("SourceLine").get("start"))
-                        bug["End"] = int(method_node.find("SourceLine").get("end"))
+                    if method_node.get("classname") == alarm.class_name:
+                        alarm.method = method_node.get("name")
+                        alarm.start = int(method_node.find("SourceLine").get("start"))
+                        alarm.end = int(method_node.find("SourceLine").get("end"))
+                        alarm.path = method_node.find("SourceLine").get("sourcepath")
                         break
                 # Method中没有出现与Class对应的方法，忽略这个警告
                 else:
                     continue
                 # 暂不记录漏洞行
                 # for source_line in item.findall("SourceLine"):
-                #     if bug["Start"] <= int(source_line.get("start")) <= bug["End"]:
-                #         bug["Line"] = int(source_line.get("start"))
-                result.append(bug)
+                #     if alarm["Start"] <= int(source_line.get("start")) <= alarm["End"]:
+                #         alarm["Line"] = int(source_line.get("start"))
+                result.append(alarm)
         return result

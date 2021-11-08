@@ -3,11 +3,12 @@
 """
 import json
 import sys
+
 import pandas as pd
 
 from data import ReportData
-from utils import LOG, PathUtils
 from label import label_bug
+from utils import LOG, PathUtils
 
 
 def add_report(report_map: dict, report: list, version_sum: int, version_index: int):
@@ -19,7 +20,7 @@ def add_report(report_map: dict, report: list, version_sum: int, version_index: 
     :param version_index: 当前版本在序列中的序号
     """
     for bug in report:
-        bug_index = bug["Class"] + "." + bug["Method"]
+        bug_index = bug["Class"] + "." + bug["Type"]
         if bug_index not in report_map.keys():
             report_map[bug_index] = [None] * version_sum
         report_map[bug_index][version_index] = bug
