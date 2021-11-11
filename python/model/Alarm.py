@@ -20,10 +20,8 @@ class Alarm(object):
         self.class_name = ""
         # 方法名
         self.method = ""
-        # 起始行
-        self.start = -1
-        # 结束行
-        self.end = -1
+        # 漏洞行位置
+        self.location = -1
         # 警告标记
         self.label = Alarm.UNKNOWN
         # 所在版本

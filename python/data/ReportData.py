@@ -1,3 +1,4 @@
+import copy
 from xml.etree import ElementTree
 
 from typing import List
@@ -54,20 +55,21 @@ class ReportData(object):
                 alarm.rank = item.get("rank")
                 alarm.class_name = item.find("Class").get("classname")
                 alarm.version = version
+                # Method中存在与Class对应的方法，补充信息
                 for method_node in item.findall("Method"):
-                    # Method中存在与Class对应的方法，补充信息
                     if method_node.get("classname") == alarm.class_name:
                         alarm.method = method_node.get("name")
-                        alarm.start = int(method_node.find("SourceLine").get("start"))
-                        alarm.end = int(method_node.find("SourceLine").get("end"))
                         alarm.path = method_node.find("SourceLine").get("sourcepath")
                         break
                 # Method中没有出现与Class对应的方法，忽略这个警告
                 else:
                     continue
-                # 暂不记录漏洞行
-                # for source_line in item.findall("SourceLine"):
-                #     if alarm["Start"] <= int(source_line.get("start")) <= alarm["End"]:
-                #         alarm["Line"] = int(source_line.get("start"))
-                result.append(alarm)
+                # 保存有精确漏洞行的警告，可能存在多个
+                for line_node in item.iterfind("SourceLine"):
+                    if line_node.get("classname") == alarm.class_name:
+                        start = int(line_node.get("start"))
+                        end = int(line_node.get("end"))
+                        if start == end:
+                            alarm.location = start
+                            result.append(copy.deepcopy(alarm))
         return result
