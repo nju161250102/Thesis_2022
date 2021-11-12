@@ -1,9 +1,9 @@
 import copy
 from xml.etree import ElementTree
 
-from typing import List
+from typing import List, Dict
 
-from model import Alarm
+from model import Alarm, ProjectConfig
 from utils import LOG, CommandUtils, PathUtils
 
 
@@ -13,21 +13,21 @@ class ReportData(object):
     """
 
     @staticmethod
-    def scan_jar(config: dict):
+    def scan_jar(config: ProjectConfig):
         """
         扫描同一个项目下不同版本的Jar包
         :param config: 项目配置dict
         """
-        PathUtils.rebuild_dir(PathUtils.report_path(config["name"]))
-        for version in config["versions"]:
-            if "select" in config.keys() and version["number"] not in config["select"]:
+        PathUtils.rebuild_dir(PathUtils.report_path(config.name))
+        for version in config.versions:
+            if config.select and version.number not in config.select:
                 continue
-            target_jar = PathUtils.project_path(config["name"], version["target"])
-            CommandUtils.find_bugs(target_jar, PathUtils.report_path(config["name"], version["number"] + ".xml"))
-            LOG.info("Scan version finished: " + version["number"])
+            target_jar = PathUtils.project_path(config.name, version.target)
+            CommandUtils.find_bugs(target_jar, PathUtils.report_path(config.name, version.number + ".xml"))
+            LOG.info("Scan version finished: " + version.number)
 
     @staticmethod
-    def scan_all_jar(config: dict):
+    def scan_all_jar(config: Dict[str, ProjectConfig]):
         """
         扫描文件内部所有的Jar包
         :param config: 所有配置

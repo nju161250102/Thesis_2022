@@ -1,8 +1,10 @@
 import re
+from typing import Dict
 
 import requests
 import wget
 
+from model import ProjectConfig, Version
 from utils import LOG, PathUtils, CommandUtils
 
 
@@ -12,7 +14,7 @@ class MavenData(object):
     """
 
     @staticmethod
-    def search_versions(project_url: str):
+    def search_versions(project_url: str) -> ProjectConfig:
         """
         搜索仓库路径下各版本的信息
         :param project_url: 必须以 / 结尾
@@ -49,41 +51,41 @@ class MavenData(object):
                         LOG.warn(sources_jar + "not found")
                         sources_jar = None
                     LOG.info(version)
-                    versions.append({
+                    versions.append(Version({
                         "number": version,
                         "updateTime": update_time,
                         "sources": sources_jar,
                         "target": target_jar
-                    })
+                    }))
         # 按版本发布的日期排序
         versions.sort(key=lambda v: v["updateTime"])
-        return {
+        return ProjectConfig({
             "name": project_name,
             "url": project_url,
             "versions": versions
-        }
+        })
 
     @staticmethod
-    def download_all(project_config: dict):
+    def download_all(project_config: Dict[str, ProjectConfig]):
         """
         下载配置文件中列出的jar包
         :param project_config: 配置信息
         """
         for project, config in project_config.items():
             # 重新建立文件夹
-            project_dir = PathUtils.join_path("project", config["name"])
+            project_dir = PathUtils.join_path("project", config.name)
             PathUtils.rebuild_dir(project_dir)
             LOG.info("Start download project: " + project)
             # 遍历下载
-            for version in config["versions"]:
+            for version in config.versions:
                 # 指定了需要下载的版本
-                if "select" in config.keys() and version["number"] not in config["select"]:
+                if version.number not in config.select:
                     continue
                 sources_jar = version["sources"]
                 target_jar = version["target"]
-                wget.download(config["url"] + version["number"] + "/" + sources_jar, project_dir)
-                wget.download(config["url"] + version["number"] + "/" + target_jar, project_dir)
+                wget.download(config.url + version.number + "/" + sources_jar, project_dir)
+                wget.download(config.url + version.number + "/" + target_jar, project_dir)
                 # 解压jar
-                CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(config["name"], version["number"]),
-                                                              PathUtils.project_path(config["name"], sources_jar)))
-                LOG.info("{0} version {1} done.".format(config["name"], version["number"]))
+                CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(config.name, version.number),
+                                                              PathUtils.project_path(config.name, sources_jar)))
+                LOG.info("{0} version {1} done.".format(config.name, version.number))
