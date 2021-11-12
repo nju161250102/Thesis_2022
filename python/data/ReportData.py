@@ -1,4 +1,6 @@
 import copy
+import linecache
+import pandas as pd
 from xml.etree import ElementTree
 
 from typing import List, Dict
@@ -27,7 +29,7 @@ class ReportData(object):
             LOG.info("Scan version finished: " + version.number)
 
     @staticmethod
-    def scan_all_jar(config: Dict[str, ProjectConfig]):
+    def scan_all_jars(config: Dict[str, ProjectConfig]):
         """
         扫描文件内部所有的Jar包
         :param config: 所有配置
@@ -73,3 +75,33 @@ class ReportData(object):
                             alarm.location = start
                             result.append(copy.deepcopy(alarm))
         return result
+
+    @staticmethod
+    def read_all_reports(config: Dict[str, ProjectConfig]):
+        """
+        读取所有扫描文件并保存为csv
+        :param config: 所有配置
+        """
+        for project, project_config in config.items():
+            reports = []
+            for version in project_config.versions:
+                reports.extend(ReportData.read_report(project_config.name, version))
+            df = pd.DataFrame([alarm.__dict__ for alarm in reports])
+            df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")
+
+    @staticmethod
+    def update_all_alarms(config: Dict[str, ProjectConfig]):
+        for project, project_config in config.items():
+            df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
+            for row in df.itertuples():
+                java_path = PathUtils.project_path(project_config.name, row.version, row.path)
+                alarm_line = linecache.getline(java_path, row.location)
+                CommandUtils.java_tools("format", java_path)
+                with open(java_path, "w") as f:
+                    for index, line in enumerate(f.readlines()):
+                        if line.strip() == alarm_line.strip():
+                            df.loc[row.Index, "location"] = index + 1
+                            break
+                    else:
+                        LOG.warn("No match line in {0}-{1}".format(project_config.name, row.Index))
+            df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")

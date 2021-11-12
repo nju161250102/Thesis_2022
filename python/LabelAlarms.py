@@ -7,7 +7,6 @@ import sys
 import pandas as pd
 
 from data import ReportData
-from label import label_bug
 from utils import LOG, PathUtils
 
 
@@ -49,8 +48,8 @@ if __name__ == "__main__":
         for i in range(len(bug_list) - 1):
             label_flag = False
             # 存在一个不一致的说明是正报
-            for j in range(i, len(bug_list)):
-                label_flag = label_flag or label_bug(bug_list[i], bug_list[j])
+            # for j in range(i, len(bug_list)):
+            #     label_flag = label_flag or label_bug(bug_list[i], bug_list[j])
             bug_list[i]["Label"] = 1 if label_flag else 0
         labeled_bug_list.extend(bug_list)
     # 保存为csv文件

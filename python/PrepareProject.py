@@ -51,7 +51,16 @@ def scan():
     依据 project.json 文件扫描相应下载好的jar包
     """
     project_config = JsonUtils.read_projects(PathUtils.join_path("project.json"))
-    ReportData.scan_all_jar(project_config)
+    ReportData.scan_all_jars(project_config)
+    ReportData.read_all_reports(project_config)
+
+
+def pre_process():
+    """
+    依据 project.json 文件整合警告并对相关java文件预处理
+    """
+    project_config = JsonUtils.read_projects(PathUtils.join_path("project.json"))
+    ReportData.update_all_alarms(project_config)
 
 
 if __name__ == "__main__":
@@ -62,3 +71,5 @@ if __name__ == "__main__":
             download()
         if sys.argv[1] == "scan":
             scan()
+        if sys.argv[1] == "pre_process":
+            pre_process()

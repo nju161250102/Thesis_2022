@@ -30,5 +30,14 @@ class CommandUtils(object):
         :param jar_path: 目标Jar地址
         :param report_path: 扫描报告目标路径
         """
-        CommandUtils.run("{0} -textui -high -sortByClass -xml -output {1} {2}".
+        CommandUtils.run("java -jar {0} -textui -high -sortByClass -xml -output {1} {2}".
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
+
+    @staticmethod
+    def java_tools(tool_type: str, *args):
+        """
+        使用Java编写的工具
+        :param tool_type: 工具类型，详见Java项目
+        :param args: 参数
+        """
+        CommandUtils.run("java -jar {0} {1} {2}".format(Config.JAVATOOLS_PATH, tool_type, " ".join(args)))
