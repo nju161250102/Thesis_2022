@@ -17,17 +17,17 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.8</version>
+            <version>1.18.22</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>
+            <version>1.7.32</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
+            <version>1.7.32</version>
         </dependency>
         <dependency>
             <groupId>com.github.javaparser</groupId>
@@ -42,6 +42,7 @@
     </dependencies>
 
     <build>
+        <finalName>JavaTools</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -51,7 +52,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>JavaFormatter</mainClass>
+                            <mainClass>MainApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -64,7 +65,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>JavaFormatter</mainClass>
+                            <mainClass>MainApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

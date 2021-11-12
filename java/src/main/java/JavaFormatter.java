@@ -9,26 +9,22 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Slf4j
 public class JavaFormatter {
 
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.exit(1);
-        }
+    public static void formatFiles(Path dirPath) {
         try {
-            Files.walk(Paths.get(args[0]))
+            Files.walk(dirPath)
                     .filter(path -> "java".equals(FilenameUtils.getExtension(path.toString())))
-                    .forEach(JavaFormatter::removeComment);
+                    .forEach(JavaFormatter::formatOneFile);
         } catch (IOException e) {
-            log.error("Wrong project path: " + args[0]);
+            log.error("Wrong project path: " + dirPath);
             e.printStackTrace();
         }
     }
 
-    private static void removeComment(Path path) {
+    public static void formatOneFile(Path path) {
         try {
             CompilationUnit cu = StaticJavaParser.parse(path);
             cu.removeComment().getAllContainedComments().forEach(Comment::remove);
