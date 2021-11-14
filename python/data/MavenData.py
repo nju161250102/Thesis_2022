@@ -81,8 +81,8 @@ class MavenData(object):
                 # 指定了需要下载的版本
                 if version.number not in config.select:
                     continue
-                sources_jar = version["sources"]
-                target_jar = version["target"]
+                sources_jar = version.sources
+                target_jar = version.target
                 wget.download(config.url + version.number + "/" + sources_jar, project_dir)
                 wget.download(config.url + version.number + "/" + target_jar, project_dir)
                 # 解压jar
