@@ -55,7 +55,7 @@ def scan():
     ReportData.read_all_reports(project_config)
 
 
-def pre_process():
+def update():
     """
     依据 project.json 文件整合警告并对相关java文件预处理
     """
@@ -71,5 +71,5 @@ if __name__ == "__main__":
             download()
         if sys.argv[1] == "scan":
             scan()
-        if sys.argv[1] == "pre_process":
-            pre_process()
+        if sys.argv[1] == "update":
+            update()

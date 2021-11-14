@@ -20,6 +20,6 @@ class Config(object):
     # Findbugs路径
     FINDBUGS_PATH = config_data["findBugsPath"]
     # Java编写的处理工具jar包路径
-    JAVATOOLS_PATH = config_data["JavaToolsPath"]
+    JAVATOOLS_PATH = config_data["javaToolsPath"]
     # Maven仓库项目URL，select标明需要扫描的版本信息
     MAVEN_URL = config_data["mavenURL"]

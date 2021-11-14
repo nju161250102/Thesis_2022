@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from Config import Config
 from .LogUtils import LOG
@@ -10,7 +11,7 @@ class CommandUtils(object):
     """
 
     @staticmethod
-    def run(command: str, path=None) -> list:
+    def run(command: str, path=None) -> List[str]:
         """
         切换到指定目录下并执行命令
         :param command: 命令
@@ -34,10 +35,11 @@ class CommandUtils(object):
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
 
     @staticmethod
-    def java_tools(tool_type: str, *args):
+    def reformat_java(file_path: str, line: int) -> int:
         """
-        使用Java编写的工具
-        :param tool_type: 工具类型，详见Java项目
-        :param args: 参数
+        格式化处理Java文件，并返回修改后行号的变化
+        :param file_path: Java文件路径
+        :param line: 原来的行号
+        :return 修改后的行号
         """
-        CommandUtils.run("java -jar {0} {1} {2}".format(Config.JAVATOOLS_PATH, tool_type, " ".join(args)))
+        return int(CommandUtils.run("java -jar {0} format {1} {2}".format(Config.JAVATOOLS_PATH, file_path, line))[0])

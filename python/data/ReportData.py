@@ -1,7 +1,5 @@
 import copy
-import difflib
 import pandas as pd
-import re
 from xml.etree import ElementTree
 
 from typing import List, Dict
@@ -101,57 +99,9 @@ class ReportData(object):
             for row in df.itertuples():
                 # java文件地址
                 java_path = PathUtils.project_path(project_config.name, row.version, row.path)
-                with open(java_path, "r") as f:
-                    original_file = f.readlines()
-                CommandUtils.java_tools("format", java_path)
-                with open(java_path, "r") as f:
-                    changed_file = f.readlines()
-                new_location = ReportData._full_compare(original_file, changed_file, row.location)
+                new_location = CommandUtils.reformat_java(java_path, row.location)
                 if new_location < 0:
-                    new_location = ReportData._diff_compare(original_file, changed_file, row.location)
-                    if new_location < 0:
-                        LOG.warn("No match line in {0}-{1}".format(project_config.name, row.Index))
-                        continue
-                df.loc[row.Index, "location"] = new_location + 1
+                    LOG.warn("No match line in {0}-{1}".format(project_config.name, row.Index))
+                    continue
+                df.loc[row.Index, "location"] = new_location
             df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")
-
-    @staticmethod
-    def _full_compare(file_a: List[str], file_b: List[str], line: int) -> int:
-        alarm_line = file_a[line]
-        for index, line in enumerate(file_b):
-            if line.strip() == alarm_line.strip():
-                return index + 1
-        return -1
-
-    @staticmethod
-    def _diff_compare(file_a: List[str], file_b: List[str], line: int) -> int:
-        diff_result = list(difflib.context_diff(file_a, file_b, n=0))
-        line_index = 3
-        start_b = 0
-        end_b = 0
-        while line_index < len(diff_result):
-            line_str = diff_result[line_index]
-            if line_str.startswith("*** "):
-                if "," in line_str:
-                    reg = re.match(r"\*{3} (\d?),(\d?) \*{4}", line_str)
-                    has_location = (int(reg.group(1)) <= line <= int(reg.group(2)))
-                else:
-                    reg = re.match(r"\*{3} (\d?) \*{4}", line_str)
-                    has_location = (int(reg.group(1)) == line)
-                if has_location:
-                    #
-                    while line_index < len(diff_result) and not diff_result[line_index].startswith("--- "):
-                        line_index += 1
-                    line_str = diff_result[line_index]
-                    if "," in line_str:
-                        reg = re.match(r"\*{3} (\d?),(\d?) \*{4}", line_str)
-                        start_b, end_b = int(reg.group(1)), int(reg.group(2))
-                    else:
-                        reg = re.match(r"\*{3} (\d?) \*{4}", line_str)
-                        start_b, end_b = int(reg.group(1)), int(reg.group(1))
-                    break
-            line_index += 1
-        else:
-            return -1
-        for i in range(start_b, end_b + 1):
-            pass
