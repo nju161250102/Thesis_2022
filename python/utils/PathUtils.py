@@ -23,6 +23,13 @@ class PathUtils(object):
         return True
 
     @staticmethod
+    def exist_path(*path_args) -> bool:
+        """
+        判断路径是否存在
+        """
+        return os.path.exists(os.path.join(Config.DATA_DIR, *path_args))
+
+    @staticmethod
     def join_path(*path_args):
         """
         数据目录下路径拼接
