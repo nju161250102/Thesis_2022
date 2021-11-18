@@ -74,7 +74,8 @@ class MavenData(object):
         for project, config in project_config.items():
             # 重新建立文件夹
             project_dir = PathUtils.join_path("project", config.name)
-            PathUtils.rebuild_dir(project_dir)
+            if not PathUtils.rebuild_dir(project_dir, skip=True):
+                continue
             LOG.info("Start download project: " + project)
             # 遍历下载
             for version in config.versions:
