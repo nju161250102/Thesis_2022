@@ -58,7 +58,7 @@ class MavenData(object):
                         "target": target_jar
                     }))
         # 按版本发布的日期排序
-        versions.sort(key=lambda v: v["updateTime"])
+        versions.sort(key=lambda v: v.updateTime)
         return ProjectConfig({
             "name": project_name,
             "url": project_url,
@@ -84,8 +84,8 @@ class MavenData(object):
                     continue
                 sources_jar = version.sources
                 target_jar = version.target
-                wget.download(config.url + version.number + "/" + sources_jar, project_dir)
-                wget.download(config.url + version.number + "/" + target_jar, project_dir)
+                wget.download(config.url + version.number + "/" + sources_jar, project_dir, None)
+                wget.download(config.url + version.number + "/" + target_jar, project_dir, None)
                 # 解压jar
                 CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(config.name, version.number),
                                                               PathUtils.project_path(config.name, sources_jar)))

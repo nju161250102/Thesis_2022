@@ -6,6 +6,7 @@ import json
 import sys
 
 from data import MavenData, ReportData
+from model import MyEncoder
 from utils import PathUtils, JsonUtils
 from Config import Config
 
@@ -32,10 +33,10 @@ def collect():
         # 将符合条件的版本号保存
         if len(select_versions) != len(info.versions):
             info.select = list(map(lambda v: v.number, select_versions))
-        result[p] = info.__dict__
+        result[p] = info
     # 保存json到数据目录
     with open(PathUtils.join_path("project.json"), "w") as f:
-        f.write(json.dumps(result, indent=4, separators=(',', ':')))
+        f.write(json.dumps(result, indent=4, separators=(',', ':'), cls=MyEncoder))
 
 
 def download():
