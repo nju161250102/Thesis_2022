@@ -31,7 +31,8 @@ def collect():
             end_date = datetime.strptime(config["endDate"], "%Y-%m-%d")
             select_versions = list(filter(lambda v: v.updateTime <= end_date, select_versions))
         # 将符合条件的版本号保存
-        if len(select_versions) != len(info.versions):
+        if "startDate" in config.keys() or "endDate" in config.keys():
+            select_versions = list(filter(lambda v: v.sources is not None and v.target is not None, select_versions))
             info.select = list(map(lambda v: v.number, select_versions))
         result[p] = info
     # 保存json到数据目录

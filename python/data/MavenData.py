@@ -35,13 +35,14 @@ class MavenData(object):
                 path = match.groups()[1]
                 update_time = groups[0]
                 file_size = groups[2]
-                if file_size == "-":
+                if file_size == "-" and update_time != "-":
                     # 进入下层目录寻找Jar包地址
-                    version = path[:-1]
+                    version_number = path[:-1]
+                    LOG.info(version_number)
                     # Jar包
-                    target_jar = "{0}-{1}.jar".format(project_name, version)
+                    target_jar = "{0}-{1}.jar".format(project_name, version_number)
                     # 源码Jar包
-                    sources_jar = "{0}-{1}-sources.jar".format(project_name, version)
+                    sources_jar = "{0}-{1}-sources.jar".format(project_name, version_number)
                     html = requests.get(project_url + path).text
                     # 精确匹配，暂时没写没模糊匹配
                     if target_jar not in html:
@@ -50,13 +51,14 @@ class MavenData(object):
                     if sources_jar not in html:
                         LOG.warn(sources_jar + "not found")
                         sources_jar = None
-                    LOG.info(version)
-                    versions.append(Version({
-                        "number": version,
+                    version = Version({
+                        "number": version_number,
                         "updateTime": update_time,
                         "sources": sources_jar,
                         "target": target_jar
-                    }))
+                    })
+                    if version.updateTime is not None:
+                        versions.append(version)
         # 按版本发布的日期排序
         versions.sort(key=lambda v: v.updateTime)
         return ProjectConfig({
