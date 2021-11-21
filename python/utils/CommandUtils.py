@@ -35,11 +35,18 @@ class CommandUtils(object):
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
 
     @staticmethod
-    def reformat_java(file_path: str, line: int) -> int:
+    def reformat_java(file_path: str, lines: List[int]) -> List[int]:
         """
         格式化处理Java文件，并返回修改后行号的变化
         :param file_path: Java文件路径
-        :param line: 原来的行号
+        :param lines: 原来的行号
         :return 修改后的行号
         """
-        return int(CommandUtils.run("java -jar {0} format {1} {2}".format(Config.JAVATOOLS_PATH, file_path, line))[0])
+        try:
+            lines_str = [str(line) for line in lines]
+            cmd_result = CommandUtils.run("java -jar {0} format {1} {2}".format(Config.JAVATOOLS_PATH, file_path, " ".join(lines_str)))
+            if len(cmd_result) == 0:
+                return [-1] * len(lines)
+            return [int(line) for line in cmd_result]
+        except IndexError or ValueError:
+            return [-1] * len(lines)

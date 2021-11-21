@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 import pandas as pd
 from xml.etree import ElementTree
 
@@ -22,6 +23,9 @@ class ReportData(object):
         PathUtils.rebuild_dir(PathUtils.report_path(config.name))
         for version in config.versions:
             if config.select and version.number not in config.select:
+                continue
+            # 跳过已经扫描过的不再扫描
+            if PathUtils.exist_path("report", config.name, version.number + ".xml"):
                 continue
             target_jar = PathUtils.project_path(config.name, version.target)
             CommandUtils.find_bugs(target_jar, PathUtils.report_path(config.name, version.number + ".xml"))
@@ -96,12 +100,11 @@ class ReportData(object):
         """
         for project, project_config in config.items():
             df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
-            for row in df.itertuples():
-                # java文件地址
-                java_path = PathUtils.project_path(project_config.name, row.version, row.path)
-                new_location = CommandUtils.reformat_java(java_path, row.location)
-                if new_location < 0:
-                    LOG.warn("No match line in {0}-{1}".format(project_config.name, row.Index))
-                    continue
-                df.loc[row.Index, "location"] = new_location
+            for index, group_df in df.groupby(["path", "version"]):
+                lines = group_df["location"].tolist()
+                java_path = PathUtils.project_path(project_config.name, index[1], index[0])
+                new_location = CommandUtils.reformat_java(java_path, lines)
+                group_df["new_location"] = np.array(new_location)
+                for row in group_df.itertuples():
+                    df.loc[row.Index, "location"] = row.new_location
             df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")

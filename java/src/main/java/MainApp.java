@@ -1,4 +1,7 @@
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainApp {
 
@@ -12,7 +15,16 @@ public class MainApp {
         }
         switch (args[0]) {
             case "format":
-                System.out.println(JavaFormatter.formatFile(Paths.get(args[1]), Integer.parseInt(args[2])));
+                List<Integer> lines = Arrays.asList(args)
+                        .subList(2, args.length)
+                        .stream()
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList());
+                String output = JavaFormatter.formatFile(Paths.get(args[1]), lines)
+                        .stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining("\n"));
+                System.out.println(output);
                 return;
             default:
                 System.exit(1);
