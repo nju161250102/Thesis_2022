@@ -1,9 +1,10 @@
-from datetime import datetime
 import json
+from datetime import datetime
+
 import requests
 
 from Config import Config
-from utils import LOG
+from Logger import LOG
 
 
 class GitData(object):

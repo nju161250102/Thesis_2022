@@ -2,7 +2,7 @@ import os
 from typing import List
 
 from Config import Config
-from .LogUtils import LOG
+from Logger import LOG
 
 
 class CommandUtils(object):

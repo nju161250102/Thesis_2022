@@ -1,12 +1,13 @@
 import copy
-import numpy as np
-import pandas as pd
+from typing import List, Dict
 from xml.etree import ElementTree
 
-from typing import List, Dict
+import numpy as np
+import pandas as pd
 
+from Logger import LOG
 from model import Alarm, ProjectConfig
-from utils import LOG, CommandUtils, PathUtils
+from utils import CommandUtils, PathUtils
 
 
 class ReportData(object):
@@ -20,7 +21,7 @@ class ReportData(object):
         扫描同一个项目下不同版本的Jar包
         :param config: 项目配置dict
         """
-        PathUtils.rebuild_dir(PathUtils.report_path(config.name))
+        PathUtils.rebuild_dir(PathUtils.report_path(config.name), skip=True)
         for version in config.versions:
             if config.select and version.number not in config.select:
                 continue
@@ -29,7 +30,7 @@ class ReportData(object):
                 continue
             target_jar = PathUtils.project_path(config.name, version.target)
             CommandUtils.find_bugs(target_jar, PathUtils.report_path(config.name, version.number + ".xml"))
-            LOG.info("Scan version finished: " + version.number)
+            LOG.info("Scan version: " + version.number)
 
     @staticmethod
     def scan_all_jars(config: Dict[str, ProjectConfig]):
@@ -38,7 +39,7 @@ class ReportData(object):
         :param config: 所有配置
         """
         for project, project_config in config.items():
-            LOG.info("Start scan project: " + project)
+            LOG.info("Scan project: " + project)
             ReportData.scan_jar(project_config)
 
     @staticmethod
@@ -54,29 +55,33 @@ class ReportData(object):
         for item in xml_doc.iterfind("BugInstance"):
             # 保证结果中有漏洞行
             if item.find("SourceLine") is not None:
-                alarm = Alarm()
-                alarm.category = item.get("category")
-                alarm.type = item.get("type")
-                alarm.rank = item.get("rank")
-                alarm.class_name = item.find("Class").get("classname")
-                alarm.version = version
-                # Method中存在与Class对应的方法，补充信息
-                for method_node in item.findall("Method"):
-                    if method_node.get("classname") == alarm.class_name:
-                        alarm.method = method_node.get("name")
-                        alarm.path = method_node.find("SourceLine").get("sourcepath")
-                        break
-                # Method中没有出现与Class对应的方法，忽略这个警告
-                else:
-                    continue
-                # 保存有精确漏洞行的警告，可能存在多个
-                for line_node in item.iterfind("SourceLine"):
-                    if line_node.get("classname") == alarm.class_name:
-                        start = int(line_node.get("start"))
-                        end = int(line_node.get("end"))
-                        if start == end:
-                            alarm.location = start
-                            result.append(copy.deepcopy(alarm))
+                try:
+                    alarm = Alarm()
+                    alarm.category = item.get("category")
+                    alarm.type = item.get("type")
+                    alarm.rank = item.get("rank")
+                    alarm.class_name = item.find("Class").get("classname")
+                    alarm.version = version
+                    # Method中存在与Class对应的方法，补充信息
+                    for method_node in item.findall("Method"):
+                        if method_node.get("classname") == alarm.class_name:
+                            alarm.method = method_node.get("name")
+                            alarm.signature = method_node.get("signature")
+                            alarm.path = method_node.find("SourceLine").get("sourcepath")
+                            break
+                    # Method中没有出现与Class对应的方法，忽略这个警告
+                    else:
+                        continue
+                    # 保存有精确漏洞行的警告，可能存在多个
+                    for line_node in item.iterfind("SourceLine"):
+                        if line_node.get("classname") == alarm.class_name:
+                            start = int(line_node.get("start"))
+                            end = int(line_node.get("end"))
+                            if start == end:
+                                alarm.location = start
+                                result.append(copy.deepcopy(alarm))
+                except Exception as e:
+                    LOG.exception(e)
         return result
 
     @staticmethod
@@ -86,8 +91,12 @@ class ReportData(object):
         :param config: 所有配置
         """
         for project, project_config in config.items():
+            if PathUtils.exist_path("report", project_config.name + ".csv"):
+                continue
             reports = []
+            LOG.info("Read project: " + project_config.name)
             for version in project_config.select:
+                LOG.info("Read version: " + version)
                 reports.extend(ReportData.read_report(project_config.name, version))
             df = pd.DataFrame([alarm.__dict__ for alarm in reports])
             df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")

@@ -1,4 +1,4 @@
-from utils import LOG
+from Logger import LOG
 from .Version import Version
 
 

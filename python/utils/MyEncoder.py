@@ -2,8 +2,8 @@ from datetime import datetime
 import json
 from typing import Any
 
-from .ProjectConfig import ProjectConfig
-from .Version import Version
+from model import ProjectConfig
+from model import Version
 
 
 class MyEncoder(json.JSONEncoder):

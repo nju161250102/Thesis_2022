@@ -1,9 +1,11 @@
-import pandas as pd
-from pandas.api.types import CategoricalDtype
 from typing import List
 
+import pandas as pd
+from pandas.api.types import CategoricalDtype
+
+from Logger import LOG
 from model import Alarm, ProjectConfig
-from utils import LOG, PathUtils
+from utils import PathUtils
 from .AlarmMatching import AlarmMatching
 
 

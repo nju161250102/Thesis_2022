@@ -7,7 +7,7 @@ import os
 
 from Config import Config
 from data import JiraData, GitData
-from utils import LOG
+from Logger import LOG
 
 if __name__ == "__main__":
     jira_data = JiraData()

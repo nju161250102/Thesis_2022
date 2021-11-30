@@ -2,9 +2,8 @@ import re
 
 import pandas as pd
 
-from data import LocalGitData
-from data import JiraData
-from utils import LOG
+from data import LocalGitData, JiraData
+from Logger import LOG
 
 
 class DataBuilder(object):

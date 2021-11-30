@@ -2,8 +2,9 @@ import difflib
 import re
 from typing import List, Tuple
 
+from Logger import LOG
 from model import Alarm
-from utils import LOG, PathUtils
+from utils import PathUtils
 
 
 class AlarmMatching(object):
@@ -32,8 +33,8 @@ class AlarmMatching(object):
         # 最匹配的警告
         matched_alarm = None
         # 前后版本的文件路径
-        file_path_a = PathUtils.project_path(self.project_name, alarm.path)
-        file_path_b = PathUtils.project_path(self.project_name, alarm_group[0].path)
+        file_path_a = PathUtils.project_path(self.project_name, alarm.version, alarm.path)
+        file_path_b = PathUtils.project_path(self.project_name, alarm.version, alarm_group[0].path)
         # 前后版本的文件内容
         file_content_a = open(file_path_a, "r").readlines()
         file_content_b = open(file_path_b, "r").readlines()
@@ -121,7 +122,7 @@ class AlarmMatching(object):
         :return: 如果不足返回None
         """
         # 读取相应文件
-        file_path = PathUtils.project_path(self.project_name, alarm.path)
+        file_path = PathUtils.project_path(self.project_name, alarm.version, alarm.path)
         file_content = open(file_path, "r").readlines()
         # 分词得到token并去除空字符串
         token_lines = [re.split(r"[\{\};\+\*\[\]\.\\\|\(\)\?\^\-/:&\s]", line) for line in file_content]

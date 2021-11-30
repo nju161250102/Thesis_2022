@@ -3,7 +3,7 @@ from typing import List
 
 from pydriller import Repository, Commit
 
-from utils import LOG
+from Logger import LOG
 
 
 class LocalGitData(object):
@@ -15,7 +15,7 @@ class LocalGitData(object):
         """
         :param repo_path: 本地仓库目录
         """
-        self._repo = Repository(repo_path, 
+        self._repo = Repository(repo_path,
                                 to=(datetime(2021, 6, 30)),
                                 only_modifications_with_file_types=[".java"])
         LOG.info("Git commit log from " + repo_path)

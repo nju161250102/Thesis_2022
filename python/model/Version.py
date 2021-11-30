@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from utils import LOG
+from Logger import LOG
 
 
 class Version(object):

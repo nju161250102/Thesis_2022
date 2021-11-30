@@ -1,8 +1,5 @@
-from datetime import datetime
-
 import jira
 
-from utils import LOG
 from Config import Config
 
 

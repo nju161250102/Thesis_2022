@@ -23,6 +23,8 @@ class Alarm(object):
         self.class_name = ""
         # 方法名
         self.method = ""
+        # 方法签名
+        self.signature = ""
         # 漏洞行位置
         self.location = -1
         # 警告标记

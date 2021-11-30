@@ -6,7 +6,7 @@ class Config(object):
     配置类，项目配置以json格式保存在外部文件
     """
     # 配置文件的地址
-    with open("/home/qianmy/ThesisData/config.json", "r") as f:
+    with open("/home/root/ThesisData/config.json", "r") as f:
         config_data = json.load(f)
 
     # 数据目录：存放下载数据和训练数据

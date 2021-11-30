@@ -9,7 +9,7 @@ if __name__ == "__main__":
     # j = JiraData()
     # d = GitData.get_interval_commits("https://api.github.com/repos/apache/kafka")
     # print(list(map(lambda c: c["sha"], d)))
-    # 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
+    # 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
     project_urls = {
         "kafka": "https://repo1.maven.org/maven2/org/apache/kafka/kafka_2.12/",
         "": ""

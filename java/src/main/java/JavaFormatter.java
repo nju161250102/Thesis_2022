@@ -40,12 +40,12 @@ public class JavaFormatter {
                         });
                         // 去除注释
                         copy_cu.removeComment().getAllContainedComments().forEach(Comment::remove);
-                        // 删除节点后与原先文本比较，缺失行标记为行号
-                        String[] original_lines = copy_cu.toString().split("\n");
-                        node[0].remove();
-                        String[] removed_lines = copy_cu.toString().split("\n");
-                        for (int i = 0; i < removed_lines.length; i++) {
-                            if (! original_lines[i].equals(removed_lines[i])) {
+                        // 为节点增加特有的行注释，再到之后的文本中查找
+                        String flagStr = Integer.toString(node[0].toString().hashCode());
+                        node[0].setLineComment(flagStr);
+                        String[] _lines = copy_cu.toString().split("\n");
+                        for (int i = 0; i < _lines.length; i++) {
+                            if (_lines[i].endsWith(flagStr)) {
                                 return i + 1;
                             }
                         }

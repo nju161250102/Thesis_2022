@@ -5,24 +5,9 @@ import sys
 
 import pandas as pd
 
+from Logger import LOG
 from label import AlarmClassifier
-from utils import LOG, PathUtils, JsonUtils
-
-
-def add_report(report_map: dict, report: list, version_sum: int, version_index: int):
-    """
-    将报告中的漏洞以 类名.方法名 聚合成 Map，保留版本顺序
-    :param report_map: 聚合 Map
-    :param report: 漏洞报告
-    :param version_sum: 版本总数
-    :param version_index: 当前版本在序列中的序号
-    """
-    for bug in report:
-        bug_index = bug["Class"] + "." + bug["Type"]
-        if bug_index not in report_map.keys():
-            report_map[bug_index] = [None] * version_sum
-        report_map[bug_index][version_index] = bug
-
+from utils import PathUtils, JsonUtils
 
 if __name__ == "__main__":
     # 项目名（和project.json中的键名保持一致）
