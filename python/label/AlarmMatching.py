@@ -34,7 +34,7 @@ class AlarmMatching(object):
         matched_alarm = None
         # 前后版本的文件路径
         file_path_a = PathUtils.project_path(self.project_name, alarm.version, alarm.path)
-        file_path_b = PathUtils.project_path(self.project_name, alarm.version, alarm_group[0].path)
+        file_path_b = PathUtils.project_path(self.project_name, alarm_group[0].version, alarm_group[0].path)
         # 前后版本的文件内容
         file_content_a = open(file_path_a, "r").readlines()
         file_content_b = open(file_path_b, "r").readlines()
@@ -77,15 +77,16 @@ class AlarmMatching(object):
                 matched_alarm = alarms_in_range[0]
         # 如果基于位置的算法失败，则采用基于片段的算法
         if matched_alarm is None:
-            alarms_in_range = list(filter(
-                lambda a: file_content_b[a.location].strip() == file_content_a[alarm.location].strip(), alarm_group))
+            alarms_in_range = []
+            for alarm_b in alarm_group:
+                if file_content_b[alarm_b.location].strip() == file_content_a[alarm.location].strip():
+                    alarms_in_range.append(alarm_b)
             alarms_in_range.sort(key=lambda a: abs(a.location - alarm.location))
             if len(alarms_in_range) > 0:
                 matched_alarm = alarms_in_range[0]
+                self.snippet_num += 1
         else:
             self.location_num += 1
-        if matched_alarm is not None:
-            self.snippet_num += 1
         return matched_alarm
 
     def other_files_match(self, alarm: Alarm, alarm_group: List[Alarm]) -> Alarm:
@@ -100,14 +101,14 @@ class AlarmMatching(object):
         # 最匹配的警告
         matched_alarm_group = []
         token_before, token_after = self._get_hash_token(alarm)
-        hash_before = hash(" ".join(token_before))
-        hash_after = hash(" ".join(token_after))
+        hash_before = None if token_before is None else hash(" ".join(token_before))
+        hash_after = None if token_after is None else hash(" ".join(token_after))
         for alarm_b in alarm_group:
             token_before, token_after = self._get_hash_token(alarm_b)
-            if hash_before is not None and hash(" ".join(token_before)) == hash_before:
+            if hash_before and token_before and hash(" ".join(token_before)) == hash_before:
                 matched_alarm_group.append(alarm_b)
                 continue
-            if hash_after is not None and hash(" ".join(token_after)) == hash_after:
+            if hash_after and token_after and hash(" ".join(token_after)) == hash_after:
                 matched_alarm_group.append(alarm_b)
         if len(matched_alarm_group) == 1:
             self.hash_num += 1
@@ -125,7 +126,7 @@ class AlarmMatching(object):
         file_path = PathUtils.project_path(self.project_name, alarm.version, alarm.path)
         file_content = open(file_path, "r").readlines()
         # 分词得到token并去除空字符串
-        token_lines = [re.split(r"[\{\};\+\*\[\]\.\\\|\(\)\?\^\-/:&\s]", line) for line in file_content]
+        token_lines = [re.split(r"[\{\};\+\*\[\]\.\\\|\(\)\?\^\-/:&<>\s]", line) for line in file_content]
         token_lines = [list(filter(lambda w: w != "", line)) for line in token_lines]
         # 警告位置之前的token
         token_before = []
@@ -133,14 +134,14 @@ class AlarmMatching(object):
             if len(token_before) + len(token_lines[i]) <= self.hash_delta:
                 token_before = token_lines[i] + token_before
             else:
-                token_before = token_lines[len(token_before) - self.hash_delta:] + token_before
+                token_before = token_lines[i][len(token_before) - self.hash_delta:] + token_before
         # 警告位置之后的token
         token_after = []
         for i in range(alarm.location - 1, len(token_lines)):
             if len(token_after) + len(token_lines[i]) <= self.hash_delta:
                 token_after = token_after + token_lines[i]
             else:
-                token_after = token_after + token_lines[:len(token_after) - self.hash_delta]
+                token_after = token_after + token_lines[i][:len(token_after) - self.hash_delta]
         if len(token_before) < self.hash_delta:
             token_before = None
         if len(token_after) < self.hash_delta:

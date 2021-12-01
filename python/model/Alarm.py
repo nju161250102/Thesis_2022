@@ -32,6 +32,15 @@ class Alarm(object):
         # 所在版本
         self.version = ""
 
+    def __eq__(self, other):
+        if type(other) == type(self):
+            for k in self.__dict__.keys():
+                if self.__dict__[k] != other.__dict__[k]:
+                    return False
+            return True
+        else:
+            return False
+
     def from_dict(self, d: dict):
         for k, v in d.items():
             if k in self.__dict__.keys():

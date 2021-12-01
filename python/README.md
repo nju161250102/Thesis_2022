@@ -4,7 +4,7 @@
 
 代码运行环境：`python3`
 
-需要安装的包：`jira`, `pydriller`, `pandas`, `wget`
+需要安装的包：`jira`, `pydriller`, `pandas`, `wget`, `numpy`
 
 系统运行环境：`Linux`, 安装了 `unzip` 和 `wget` 命令
 

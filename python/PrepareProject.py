@@ -41,12 +41,13 @@ def update():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        if sys.argv[1] == "collect":
-            collect()
-        if sys.argv[1] == "download":
-            download()
-        if sys.argv[1] == "scan":
-            scan()
-        if sys.argv[1] == "update":
-            update()
+    if len(sys.argv) >= 2:
+        for arg in sys.argv[1:]:
+            if arg == "collect":
+                collect()
+            if arg == "download":
+                download()
+            if arg == "scan":
+                scan()
+            if arg == "update":
+                update()
