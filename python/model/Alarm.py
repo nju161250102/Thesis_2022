@@ -14,9 +14,11 @@ class Alarm(object):
     TP = 1
 
     def __init__(self):
+        # 警告属性
         self.category = ""
         self.type = ""
-        self.rank = 0
+        self.priority = -1
+        self.rank = -1
         # 路径
         self.path = ""
         # 类名

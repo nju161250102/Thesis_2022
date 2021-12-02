@@ -58,8 +58,9 @@ class ReportData(object):
                 try:
                     alarm = Alarm()
                     alarm.category = item.get("category")
-                    alarm.type = item.get("type")
+                    alarm.priority = item.get("priority")
                     alarm.rank = item.get("rank")
+                    alarm.type = item.get("type")
                     alarm.class_name = item.find("Class").get("classname")
                     alarm.version = version
                     # Method中存在与Class对应的方法，补充信息
