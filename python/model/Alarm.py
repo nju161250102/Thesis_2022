@@ -14,6 +14,8 @@ class Alarm(object):
     TP = 1
 
     def __init__(self):
+        # 警告ID 项目名#ID
+        self.index = ""
         # 警告属性
         self.category = ""
         self.type = ""
@@ -27,8 +29,9 @@ class Alarm(object):
         self.method = ""
         # 方法签名
         self.signature = ""
-        # 漏洞行位置
+        # 漏洞行位置，分别为原始位置和处理后文件中的位置
         self.location = -1
+        self.new_location = -1
         # 警告标记
         self.label = Alarm.UNKNOWN
         # 所在版本

@@ -1,8 +1,11 @@
+import json
 import os
 from typing import List
 
 from Config import Config
 from Logger import LOG
+from model import Alarm
+from .MyEncoder import MyEncoder
 
 
 class CommandUtils(object):
@@ -35,18 +38,26 @@ class CommandUtils(object):
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
 
     @staticmethod
-    def reformat_java(file_path: str, lines: List[int]) -> List[int]:
+    def reformat_java(file_path: str, save_path: str, lines: List[int]) -> List[int]:
         """
-        格式化处理Java文件，并返回修改后行号的变化
-        :param file_path: Java文件路径
+        调用Jar格式化处理Java文件，并返回修改后行号的变化
+        :param file_path: 原始的Java文件路径
+        :param save_path: 修改后的Java文件路径
         :param lines: 原来的行号
         :return 修改后的行号
         """
         try:
             lines_str = [str(line) for line in lines]
-            cmd_result = CommandUtils.run("java -jar {0} format {1} {2}".format(Config.JAVATOOLS_PATH, file_path, " ".join(lines_str)))
+            cmd_result = CommandUtils.run("java -jar {0} format {1} {2} {3}"
+                                          .format(Config.JAVATOOLS_PATH, file_path, save_path, " ".join(lines_str)))
             if len(cmd_result) == 0:
                 return [-1] * len(lines)
             return [int(line) for line in cmd_result]
         except IndexError or ValueError:
             return [-1] * len(lines)
+
+    @staticmethod
+    def method_analyse(project_path: str, alarm: Alarm):
+        cmd_result = CommandUtils.run("java -jar {0} method {1} \"{2}\"".format(
+            Config.JAVATOOLS_PATH, project_path, json.dumps(alarm.__dict__, separators=(',',':')).replace('"', '\\"')))
+        print(cmd_result[0])

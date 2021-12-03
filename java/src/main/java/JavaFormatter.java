@@ -6,6 +6,7 @@ import com.github.javaparser.ast.comments.Comment;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,6 +26,11 @@ public class JavaFormatter {
      */
     public static List<Integer> formatFile(Path path, List<Integer> lines) {
         try {
+            // 文件复制一份副本
+            String fileName = path.getFileName().toString();
+            Path newFilePath = path.getParent().resolve("_" + fileName);
+            FileUtils.copyFile(path.toFile(), newFilePath.toFile());
+            // 开始处理
             CompilationUnit cu = StaticJavaParser.parse(path);
             List<Integer> result = lines.stream()
                     .map(line -> {

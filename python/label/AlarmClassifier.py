@@ -21,7 +21,7 @@ class AlarmClassifier(object):
         self.version_type = CategoricalDtype(config.select, ordered=True)
         self.report_df = pd.read_csv(PathUtils.report_path(config.name + ".csv"), index_col="index")
         self.all_num = len(self.report_df)
-        self.report_df = self.report_df[self.report_df["location"] != -1]
+        self.report_df = self.report_df[self.report_df["new_location"] != -1]
         self.report_df["version"] = self.report_df["version"].astype(self.version_type)
         self.alarm_matcher = AlarmMatching(config.name)
 

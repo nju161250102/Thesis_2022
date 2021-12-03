@@ -44,6 +44,13 @@ class PathUtils(object):
         return os.path.join(Config.DATA_DIR, "project", *path_args)
 
     @staticmethod
+    def file_path(*path_args):
+        """
+        Java文件副本目录下路径拼接
+        """
+        return os.path.join(Config.DATA_DIR, "file", *path_args)
+
+    @staticmethod
     def report_path(*path_args):
         """
         扫描报告目录下路径拼接

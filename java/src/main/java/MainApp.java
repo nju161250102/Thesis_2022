@@ -1,3 +1,6 @@
+import com.alibaba.fastjson.JSONObject;
+import model.Alarm;
+
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +28,10 @@ public class MainApp {
                         .map(String::valueOf)
                         .collect(Collectors.joining("\n"));
                 System.out.println(output);
+                return;
+            case "method":
+                JavaAnalyzer analyzer = new JavaAnalyzer(args[1], JSONObject.parseObject(args[2], Alarm.class));
+                System.out.println(JSONObject.toJSONString(analyzer));
                 return;
             default:
                 System.exit(1);

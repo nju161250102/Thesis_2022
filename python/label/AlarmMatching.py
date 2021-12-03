@@ -33,8 +33,8 @@ class AlarmMatching(object):
         # 最匹配的警告
         matched_alarm = None
         # 前后版本的文件路径
-        file_path_a = PathUtils.project_path(self.project_name, alarm.version, alarm.path)
-        file_path_b = PathUtils.project_path(self.project_name, alarm_group[0].version, alarm_group[0].path)
+        file_path_a = PathUtils.file_path(self.project_name, alarm.version, alarm.path)
+        file_path_b = PathUtils.file_path(self.project_name, alarm_group[0].version, alarm_group[0].path)
         # 前后版本的文件内容
         file_content_a = open(file_path_a, "r").readlines()
         file_content_b = open(file_path_b, "r").readlines()
@@ -56,32 +56,32 @@ class AlarmMatching(object):
         line_range_b.append(len(file_content_b))
         # 判断是匹配块还是差异块
         index = 0
-        while line_range_a[index + 1] <= alarm.location:
+        while line_range_a[index + 1] <= alarm.new_location:
             index += 1
         # 如果是匹配块
         if index % 2 == 0:
             # 找一个位置差相同的警告
-            target_location = line_range_b[index] + (alarm.location - line_range_a[index])
+            target_location = line_range_b[index] + (alarm.new_location - line_range_a[index])
             for alarm_b in alarm_group:
-                if alarm_b.location == target_location:
+                if alarm_b.new_location == target_location:
                     matched_alarm = alarm_b
         # 如果是差异块
         else:
-            delta_a = alarm.location - line_range_a[index]
+            delta_a = alarm.new_location - line_range_a[index]
             alarms_in_range = list(filter(
-                lambda a: line_range_b[index] <= a.location < line_range_b[index + 1], alarm_group))
+                lambda a: line_range_b[index] <= a.new_location < line_range_b[index + 1], alarm_group))
             alarms_in_range = list(filter(
-                lambda a: abs(a.location - line_range_b[index] - delta_a) <= self.location_delta, alarms_in_range))
-            alarms_in_range.sort(key=lambda a: abs(a.location - line_range_b[index] - delta_a))
+                lambda a: abs(a.new_location - line_range_b[index] - delta_a) <= self.location_delta, alarms_in_range))
+            alarms_in_range.sort(key=lambda a: abs(a.new_location - line_range_b[index] - delta_a))
             if len(alarms_in_range) > 0:
                 matched_alarm = alarms_in_range[0]
         # 如果基于位置的算法失败，则采用基于片段的算法
         if matched_alarm is None:
             alarms_in_range = []
             for alarm_b in alarm_group:
-                if file_content_b[alarm_b.location].strip() == file_content_a[alarm.location].strip():
+                if file_content_b[alarm_b.new_location].strip() == file_content_a[alarm.new_location].strip():
                     alarms_in_range.append(alarm_b)
-            alarms_in_range.sort(key=lambda a: abs(a.location - alarm.location))
+            alarms_in_range.sort(key=lambda a: abs(a.new_location - alarm.new_location))
             if len(alarms_in_range) > 0:
                 matched_alarm = alarms_in_range[0]
                 self.snippet_num += 1
@@ -123,21 +123,21 @@ class AlarmMatching(object):
         :return: 如果不足返回None
         """
         # 读取相应文件
-        file_path = PathUtils.project_path(self.project_name, alarm.version, alarm.path)
+        file_path = PathUtils.file_path(self.project_name, alarm.version, alarm.path)
         file_content = open(file_path, "r").readlines()
         # 分词得到token并去除空字符串
         token_lines = [re.split(r"[\{\};\+\*\[\]\.\\\|\(\)\?\^\-/:&<>\s]", line) for line in file_content]
         token_lines = [list(filter(lambda w: w != "", line)) for line in token_lines]
         # 警告位置之前的token
         token_before = []
-        for i in range(alarm.location - 2, -1, -1):
+        for i in range(alarm.new_location - 2, -1, -1):
             if len(token_before) + len(token_lines[i]) <= self.hash_delta:
                 token_before = token_lines[i] + token_before
             else:
                 token_before = token_lines[i][len(token_before) - self.hash_delta:] + token_before
         # 警告位置之后的token
         token_after = []
-        for i in range(alarm.location - 1, len(token_lines)):
+        for i in range(alarm.new_location - 1, len(token_lines)):
             if len(token_after) + len(token_lines[i]) <= self.hash_delta:
                 token_after = token_after + token_lines[i]
             else:

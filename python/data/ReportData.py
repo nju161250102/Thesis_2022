@@ -83,15 +83,20 @@ class ReportData(object):
                                 result.append(copy.deepcopy(alarm))
                 except Exception as e:
                     LOG.exception(e)
+        # 按顺序标记警告编号
+        for index, alarm in enumerate(result):
+            alarm.index = "{0}#{1}".format(project_name, index)
         return result
 
     @staticmethod
     def read_all_reports(config: Dict[str, ProjectConfig]):
         """
-        读取所有扫描文件并保存为csv
+        读取所有项目的扫描结果文件并按项目分别保存为csv文件
+        注意：如果目标csv文件已经存在会自动跳过，节约时间
         :param config: 所有配置
         """
         for project, project_config in config.items():
+            # 如果目标csv文件已经存在则自动跳过
             if PathUtils.exist_path("report", project_config.name + ".csv"):
                 continue
             reports = []
@@ -105,16 +110,21 @@ class ReportData(object):
     @staticmethod
     def update_all_alarms(config: Dict[str, ProjectConfig]):
         """
-        格式化警告涉及的java文件，并更新行号
+        对警告涉及的 java 文件进行格式化，为了之后做差异块比较
+        新文件会被保存到数据文件夹下的 file/{project_name} 目录，文件名为警告ID
+        新文件中对应的行号会保存到 new_location 字段
         :param config: 所有配置
         """
         for project, project_config in config.items():
             df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
+            PathUtils.rebuild_dir(PathUtils.file_path(project_config.name))
+            # 以每个版本中的每个文件为单位进行处理
             for index, group_df in df.groupby(["path", "version"]):
                 lines = group_df["location"].tolist()
                 java_path = PathUtils.project_path(project_config.name, index[1], index[0])
-                new_location = CommandUtils.reformat_java(java_path, lines)
+                new_java_path = PathUtils.file_path(project_config.name, index[1], index[0])
+                new_location = CommandUtils.reformat_java(java_path, new_java_path, lines)
                 group_df["new_location"] = np.array(new_location)
                 for row in group_df.itertuples():
-                    df.loc[row.Index, "location"] = row.new_location
+                    df.loc[row.Index, "new_location"] = row.new_location
             df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")
