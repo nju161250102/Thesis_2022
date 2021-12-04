@@ -28,14 +28,24 @@ class CommandUtils(object):
             return p.readlines()
 
     @staticmethod
-    def find_bugs(jar_path: str, report_path: str):
+    def run_findbugs(jar_path: str, report_path: str):
         """
-        使用Findbugs扫描得到扫描报告
-        :param jar_path: 目标Jar地址
-        :param report_path: 扫描报告目标路径
+        使用Findbugs扫描得到xml格式的扫描报告
+        :param jar_path: 目标Jar路径
+        :param report_path: 扫描报告保存路径
         """
         CommandUtils.run("java -jar {0} -textui -low -sortByClass -xml -output {1} {2}".
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
+
+    @staticmethod
+    def run_jhawk(project_path: str, report_path: str):
+        """
+        使用JHawk命令行工具计算代码度量，并输出为xml文件
+        :param project_path: 扫描项目路径
+        :param report_path: 度量报告保存路径 [注意：末尾不需要.xml后缀名]
+        """
+        CommandUtils.run("java -jar {0}/JHawkCommandLine.jar -x {1} -f .*\.java -r -s {2} -l pcm -a".
+                         format(Config.JHAWK_PATH, report_path, project_path))
 
     @staticmethod
     def reformat_java(file_path: str, save_path: str, lines: List[int]) -> List[int]:
@@ -43,8 +53,8 @@ class CommandUtils(object):
         调用Jar格式化处理Java文件，并返回修改后行号的变化
         :param file_path: 原始的Java文件路径
         :param save_path: 修改后的Java文件路径
-        :param lines: 原来的行号
-        :return 修改后的行号
+        :param lines: 原来的行号列表
+        :return 修改后对应的行号列表
         """
         try:
             lines_str = [str(line) for line in lines]

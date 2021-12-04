@@ -8,7 +8,7 @@ class FeatureCategory(object):
 
     def __init__(self, alarm_df: pd.DataFrame, project_name: str, version: str):
         """
-        :param alarm_df: 当前版本的所有警告
+        :param alarm_df: 当前版本的所有警告 [注意：这里使用copy获得了副本，不会影响原来的数据]
         :param project_name: 项目名称
         :param version: 项目版本
         """

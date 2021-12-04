@@ -19,6 +19,8 @@ class Config(object):
     GIT_TOKEN = config_data["gitToken"]
     # Findbugs路径
     FINDBUGS_PATH = config_data["findBugsPath"]
+    # JHAWK工具路径
+    JHAWK_PATH = config_data["JhawkPath"]
     # Java编写的处理工具jar包路径
     JAVATOOLS_PATH = config_data["javaToolsPath"]
     # Maven仓库项目URL，select标明需要扫描的版本信息
