@@ -58,10 +58,10 @@ class PathUtils(object):
         return os.path.join(Config.DATA_DIR, "report", *path_args)
 
     @staticmethod
-    def alarm_path(*path_args):
+    def feature_path(*path_args):
         """
-        误报警告目录下路径拼接
+        警告特征目录下路径拼接
         """
-        return os.path.join(Config.DATA_DIR, "alarm", *path_args)
+        return os.path.join(Config.DATA_DIR, "feature", *path_args)
 
 

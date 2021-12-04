@@ -1,4 +1,6 @@
 import pandas as pd
+
+from Logger import LOG
 from .FeatureCategory import FeatureCategory
 
 
@@ -9,15 +11,16 @@ class WarningChr(FeatureCategory):
 
     def __init__(self, alarm_df: pd.DataFrame, project_name: str, version: str):
         super().__init__(alarm_df, project_name, version)
+        LOG.info("WarningChr in project {0}, version {1}".format(project_name, version))
 
     def get_feature_df(self) -> pd.DataFrame:
         feature_df = pd.DataFrame()
-        feature_df.join(self._warning_type(), how="right")
-        feature_df.join(self._warning_priority(), how="right")
-        feature_df.join(self._warning_rank(), how="right")
-        feature_df.join(self._num_in_method(), how="right")
-        feature_df.join(self._num_in_class(), how="right")
-        feature_df.join(self._num_in_package(), how="right")
+        feature_df = feature_df.join(self._warning_type(), how="right")
+        feature_df = feature_df.join(self._warning_priority(), how="right")
+        feature_df = feature_df.join(self._warning_rank(), how="right")
+        feature_df = feature_df.join(self._num_in_method(), how="right")
+        feature_df = feature_df.join(self._num_in_class(), how="right")
+        feature_df = feature_df.join(self._num_in_package(), how="right")
         return feature_df
 
     def _warning_type(self) -> pd.Series:
