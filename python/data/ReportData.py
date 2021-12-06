@@ -105,7 +105,7 @@ class ReportData(object):
                 LOG.info("Read version: " + version)
                 reports.extend(ReportData.read_report(project_config.name, version))
             df = pd.DataFrame([alarm.__dict__ for alarm in reports])
-            df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")
+            df.to_csv(PathUtils.report_path(project_config.name + ".csv"))
 
     @staticmethod
     def update_all_alarms(config: Dict[str, ProjectConfig]):
@@ -116,7 +116,7 @@ class ReportData(object):
         :param config: 所有配置
         """
         for project, project_config in config.items():
-            df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
+            df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"))
             PathUtils.rebuild_dir(PathUtils.file_path(project_config.name))
             # 以每个版本中的每个文件为单位进行处理
             for index, group_df in df.groupby(["path", "version"]):
@@ -127,4 +127,4 @@ class ReportData(object):
                 group_df["new_location"] = np.array(new_location)
                 for row in group_df.itertuples():
                     df.loc[row.Index, "new_location"] = row.new_location
-            df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index_label="index")
+            df.to_csv(PathUtils.report_path(project_config.name + ".csv"))
