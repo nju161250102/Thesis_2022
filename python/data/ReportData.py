@@ -78,14 +78,15 @@ class ReportData(object):
                         if line_node.get("classname") == alarm.class_name:
                             start = int(line_node.get("start"))
                             end = int(line_node.get("end"))
-                            if start == end:
+                            # [不同的SourceLine可能会出现相同的行号，需要避免重复添加]
+                            if start == end and alarm.location != start:
                                 alarm.location = start
                                 result.append(copy.deepcopy(alarm))
                 except Exception as e:
                     LOG.exception(e)
         # 按顺序标记警告编号
         for index, alarm in enumerate(result):
-            alarm.index = "{0}#{1}".format(project_name, index)
+            alarm.index = "{0}#{1}#{2}".format(project_name, version, index)
         return result
 
     @staticmethod
@@ -105,7 +106,7 @@ class ReportData(object):
                 LOG.info("Read version: " + version)
                 reports.extend(ReportData.read_report(project_config.name, version))
             df = pd.DataFrame([alarm.__dict__ for alarm in reports])
-            df.to_csv(PathUtils.report_path(project_config.name + ".csv"))
+            df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index=False)
 
     @staticmethod
     def update_all_alarms(config: Dict[str, ProjectConfig]):
@@ -116,7 +117,7 @@ class ReportData(object):
         :param config: 所有配置
         """
         for project, project_config in config.items():
-            df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"))
+            df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
             PathUtils.rebuild_dir(PathUtils.file_path(project_config.name))
             # 以每个版本中的每个文件为单位进行处理
             for index, group_df in df.groupby(["path", "version"]):
@@ -126,5 +127,5 @@ class ReportData(object):
                 new_location = CommandUtils.reformat_java(java_path, new_java_path, lines)
                 group_df["new_location"] = np.array(new_location)
                 for row in group_df.itertuples():
-                    df.loc[row.Index, "new_location"] = row.new_location
+                    df.at[row.Index, "new_location"] = row.new_location
             df.to_csv(PathUtils.report_path(project_config.name + ".csv"))
