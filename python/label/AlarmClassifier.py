@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Dict
 
 import pandas as pd
 from pandas.api.types import CategoricalDtype
 
 from Logger import LOG
-from model import Alarm, ProjectConfig
+from model import Alarm
 from utils import PathUtils
 from .AlarmMatching import AlarmMatching
 
@@ -14,25 +14,23 @@ class AlarmClassifier(object):
     警告分类器：用于标注正误报
     """
 
-    def __init__(self, config: ProjectConfig):
-        self.project_name = config.name
-        # 按版本先后顺序排列的扫描报告
-        self.versions = config.select
-        self.version_type = CategoricalDtype(config.select, ordered=True)
-        self.report_df = pd.read_csv(PathUtils.report_path(config.name + ".csv"))
-        self.all_num = len(self.report_df)
-        self.report_df = self.report_df[self.report_df["new_location"] != -1]
-        self.report_df["version"] = self.report_df["version"].astype(self.version_type)
-        self.alarm_matcher = AlarmMatching(config.name)
+    def __init__(self, alarm_df: pd.DataFrame, versions: List[str], project_name: str):
+        self.alarm_df = alarm_df.copy()
+        self.versions = versions
+        self.alarm_matcher = AlarmMatching(project_name)
+        # 用于将扫描报告按版本先后顺序排列
+        self.version_type = CategoricalDtype(self.versions, ordered=True)
+        self.alarm_df = self.alarm_df[self.alarm_df["new_location"] != -1]
+        self.alarm_df["version"] = self.alarm_df["version"].astype(self.version_type)
 
-    def handle(self) -> List[Alarm]:
+    def handle(self) -> Dict[str, int]:
         """
         不同版本扫描报告中的警告标记出正误报
-        :return: 所有标记完的警告列表
+        :return: 警告ID到标签的关系
         """
         alarm_groups = []
         # 首先，在不同版本的警告中找出相同的警告
-        for alarm_index, df in self.report_df.groupby(["path", "type"]):
+        for alarm_index, df in self.alarm_df.groupby(["path", "type"]):
             grouped = list(df.groupby("version"))
             grouped = list(filter(lambda g: len(g[1]) != 0, grouped))
             # 不处理仅出现在一个版本之中的警告
@@ -50,9 +48,9 @@ class AlarmClassifier(object):
                     if matched_alarm is not None:
                         has_flag = False
                         for j in range(len(alarm_groups)):
-                            if alarm_groups[j][-1] == alarm_a:
-                                has_flag = True
+                            if alarm_groups[j][-1].index == alarm_a.index:
                                 alarm_groups[j].append(matched_alarm)
+                                has_flag = True
                         if not has_flag:
                             alarm_groups.append([alarm_a, matched_alarm])
         LOG.info("Match pairs: {0}".format(len(alarm_groups)))
@@ -73,16 +71,17 @@ class AlarmClassifier(object):
                 if self.versions[i] in alarm_group_dict.keys():
                     alarm_group_dict[self.versions[i]].label = Alarm.TP if i < version_index else Alarm.FP
             # 中间值测试
-            alarm_flag_list.append([v in alarm_group_dict.keys() for v in self.versions])
+            alarm_flag_list.append([(alarm_group_dict[v].index if v in alarm_group_dict.keys() else None) for v in self.versions])
         # 保存中间值参考
         df = pd.DataFrame(alarm_flag_list, columns=self.versions)
         df.to_csv(PathUtils.report_path("temp.csv"))
         # 合并所有标记后的警告
-        result = []
+        result = {}
         for alarm_group in alarm_groups:
-            result.extend(alarm_group)
-        # 简单统计
-        TP_num = sum(map(lambda a: 1 if a.label == Alarm.TP else 0, result))
-        FP_num = sum(map(lambda a: 1 if a.label == Alarm.FP else 0, result))
-        LOG.info("All: {0}, TP: {1}, FP: {2}".format(self.all_num, TP_num, FP_num))
+            for alarm in alarm_group:
+                # 如果警告标记冲突，重新标为不确定
+                if alarm.index in result.keys() and result[alarm.index] != alarm.label:
+                    result[alarm.index] = Alarm.UNKNOWN
+                else:
+                    result[alarm.index] = alarm.label
         return result

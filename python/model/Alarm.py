@@ -54,4 +54,4 @@ class Alarm(object):
 
     @staticmethod
     def from_dataframe(df: pd.DataFrame) -> list:
-        return [Alarm().from_dict(row) for row in df.to_dict("records")]
+        return [Alarm().from_dict(row) for row in df.reset_index().to_dict("records")]
