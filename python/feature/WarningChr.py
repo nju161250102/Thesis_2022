@@ -14,13 +14,8 @@ class WarningChr(FeatureCategory):
         LOG.info("WarningChr in project {0}, version {1}".format(project_name, version))
 
     def get_feature_df(self) -> pd.DataFrame:
-        feature_df = pd.DataFrame()
-        feature_df = feature_df.join(self._warning_type(), how="right")
-        feature_df = feature_df.join(self._warning_priority(), how="right")
-        feature_df = feature_df.join(self._warning_rank(), how="right")
-        feature_df = feature_df.join(self._num_in_method(), how="right")
-        feature_df = feature_df.join(self._num_in_class(), how="right")
-        feature_df = feature_df.join(self._num_in_package(), how="right")
+        columns = [self._warning_type(), self._warning_priority(), self._warning_rank(), self._num_in_method(), self._num_in_class(), self._num_in_package()]
+        feature_df = pd.DataFrame({s.name: s for s in columns}, index=self.alarm_df.index)
         return feature_df
 
     def _warning_type(self) -> pd.Series:

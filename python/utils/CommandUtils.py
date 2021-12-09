@@ -5,7 +5,6 @@ from typing import List
 from Config import Config
 from Logger import LOG
 from model import Alarm
-from .MyEncoder import MyEncoder
 
 
 class CommandUtils(object):
@@ -44,7 +43,7 @@ class CommandUtils(object):
         :param project_path: 扫描项目路径
         :param report_path: 度量报告保存路径 [注意：末尾不需要.xml后缀名]
         """
-        CommandUtils.run("java -jar {0}/JHawkCommandLine.jar -x {1} -f .*\.java -r -s {2} -l pcm -a".
+        CommandUtils.run("java -jar {0}/JHawkCommandLine.jar -x {1} -f .*\.java -r -s {2} -l pcm -a -p {0}/jhawk.properties".
                          format(Config.JHAWK_PATH, report_path, project_path))
 
     @staticmethod
@@ -69,5 +68,5 @@ class CommandUtils(object):
     @staticmethod
     def method_analyse(project_path: str, alarm: Alarm):
         cmd_result = CommandUtils.run("java -jar {0} method {1} \"{2}\"".format(
-            Config.JAVATOOLS_PATH, project_path, json.dumps(alarm.__dict__, separators=(',',':')).replace('"', '\\"')))
+            Config.JAVATOOLS_PATH, project_path, json.dumps(alarm.__dict__, separators=(',', ':')).replace('"', '\\"')))
         print(cmd_result[0])

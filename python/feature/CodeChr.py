@@ -21,7 +21,8 @@ class CodeChr(FeatureCategory):
         self.alarm_df["package"] = self.alarm_df["class_name"].map(lambda s: ".".join(s.split(".")[:-1]))
         project_path = PathUtils.project_path(project_name, version)
         report_path = PathUtils.report_path(project_name, "jhawk#" + version)
-        CommandUtils.run_jhawk(project_path, report_path)
+        if not PathUtils.exist_path("report", project_name, "jhawk#" + version + ".xml"):
+            CommandUtils.run_jhawk(project_path, report_path)
         # 完整包名 -> 度量指标
         self.package_map = {}
         # 完整类名 -> 度量指标
@@ -30,23 +31,30 @@ class CodeChr(FeatureCategory):
         self.method_map = {}
         # 从xml文件中读取度量数据
         xml_doc = ElementTree.parse(report_path + ".xml")
-        for package_item in xml_doc.iterfind("./Packages/Package/Metrics"):
-            package_metric = PackageMetric(package_item)
-            self.package_map[package_metric.name] = package_metric
+        for package_item in xml_doc.iterfind("./Packages/Package"):
+            self.package_map[package_item.findtext("Name")] = PackageMetric(package_item.find("Metrics"))
         for class_item in xml_doc.iterfind("./Packages/Package/Classes/Class"):
-            class_metric = ClassMetric(class_item.find("Metrics"))
-            self.class_map[class_metric.name] = class_metric
-            for method_item in class_item.iterfind("./Methods/Method/Metrics"):
-                method_metric = MethodMetric(method_item)
-                self.method_map["{0}.{1}".format(class_metric.name, method_metric.name)] = method_metric
+            class_name = "{0}.{1}".format(class_item.findtext("OwningPackage"), class_item.findtext("ClassName"))
+            self.class_map[class_name] = ClassMetric(class_item.find("Metrics"))
+        for method_item in xml_doc.iterfind("./Packages/Package/Classes/Class/Methods/Method"):
+            method_name = "{0}.{1}".format(method_item.findtext("ClassName"), method_item.findtext("Name"))
+            self.method_map[method_name] = MethodMetric(method_item.find("Metrics"))
         LOG.info("package: {0}, class: {1}, method: {2}".
                  format(len(self.package_map), len(self.class_map), len(self.method_map)))
 
     def get_feature_df(self) -> pd.DataFrame:
         def func(row: pd.Series, code_chr: CodeChr) -> pd.Series:
-            package_metric = code_chr.package_map[row["package"]]
-            class_metric = code_chr.class_map[row["class"]]
-            method_metric = code_chr.method_map["{0}.{1}".format(row["class"], row["method"])]
+            package_metric = code_chr.package_map.get(row["package"])
+            class_metric = code_chr.class_map.get(row["class_name"])
+            if row["method"] == "<init>":
+                # 获取类或者内部类
+                if "$" in row["class_name"]:
+                    class_name = row["class_name"].split("$")[-1]
+                else:
+                    class_name = row["class_name"].split(".")[-1]
+                method_metric = code_chr.method_map.get("{0}.{1}".format(row["class_name"], class_name))
+            else:
+                method_metric = code_chr.method_map.get("{0}.{1}".format(row["class_name"], row["method"]))
             # 读取警告行获取缩进空格数
             warning_line = linecache.getline(
                 PathUtils.project_path(code_chr.project_name, code_chr.version, row["path"]), row["location"])
@@ -61,25 +69,25 @@ class CodeChr(FeatureCategory):
             result = {
                 # *注：原论文中的文件级别均被替换为类级别
                 # F19 number of non-comment source code statements in method
-                "code_method_statement": method_metric.statement_num,
+                "code_method_statement": method_metric.statement_num if method_metric else None,
                 # *F20 number of non-comment source code statements in class
-                "code_class_statement": class_metric.statement_num,
+                "code_class_statement": class_metric.statement_num if class_metric else None,
                 # F21 number of non-comment source code statements in package
-                "code_package_statement": package_metric.statement_num,
+                "code_package_statement": package_metric.statement_num if package_metric else None,
                 # *F22 number of comment lines in class
-                "code_class_comment": class_metric.comment_line,
+                "code_class_comment": class_metric.comment_line if class_metric else None,
                 # *F23 ratio of comment length and code length in class
-                "code_class_comment_ratio": class_metric.comment_line * 1.0 / class_metric.code_line,
+                "code_class_comment_ratio": class_metric.comment_line * 1.0 / class_metric.code_line if class_metric else None,
                 # *F28 number of methods in class
-                "code_class_method": class_metric.method_num,
+                "code_class_method": class_metric.method_num if class_metric else None,
                 # F29 number of methods in package
-                "code_package_method": package_metric.method_num,
+                "code_package_method": package_metric.method_num if package_metric else None,
                 # F31 number of classed in package
-                "code_package_class": package_metric.class_num,
+                "code_package_class": package_metric.class_num if package_metric else None,
                 # F32 space indenting warned line
                 "code_indentation": indentation,
                 # F33 cyclomatic complexity
-                "code_cyclomatic_complexity": method_metric.complexity
+                "code_cyclomatic_complexity": method_metric.complexity if method_metric else None
             }
             return pd.Series(result)
 
