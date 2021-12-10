@@ -4,7 +4,7 @@ from xml.etree import ElementTree
 import pandas as pd
 
 from Logger import LOG
-from model import PackageMetric, ClassMetric, MethodMetric
+from model import PackageMetric, ClassMetric, MethodMetric, FeatureType
 from utils import CommandUtils, PathUtils
 from .FeatureCategory import FeatureCategory
 
@@ -67,27 +67,16 @@ class CodeChr(FeatureCategory):
                 else:
                     break
             result = {
-                # *注：原论文中的文件级别均被替换为类级别
-                # F19 number of non-comment source code statements in method
-                "code_method_statement": method_metric.statement_num if method_metric else None,
-                # *F20 number of non-comment source code statements in class
-                "code_class_statement": class_metric.statement_num if class_metric else None,
-                # F21 number of non-comment source code statements in package
-                "code_package_statement": package_metric.statement_num if package_metric else None,
-                # *F22 number of comment lines in class
-                "code_class_comment": class_metric.comment_line if class_metric else None,
-                # *F23 ratio of comment length and code length in class
-                "code_class_comment_ratio": class_metric.comment_line * 1.0 / class_metric.code_line if class_metric else None,
-                # *F28 number of methods in class
-                "code_class_method": class_metric.method_num if class_metric else None,
-                # F29 number of methods in package
-                "code_package_method": package_metric.method_num if package_metric else None,
-                # F31 number of classed in package
-                "code_package_class": package_metric.class_num if package_metric else None,
-                # F32 space indenting warned line
-                "code_indentation": indentation,
-                # F33 cyclomatic complexity
-                "code_cyclomatic_complexity": method_metric.complexity if method_metric else None
+                FeatureType.F19: method_metric.statement_num if method_metric else None,
+                FeatureType.F20: class_metric.statement_num if class_metric else None,
+                FeatureType.F21: package_metric.statement_num if package_metric else None,
+                FeatureType.F22: class_metric.comment_line if class_metric else None,
+                FeatureType.F23: class_metric.comment_line * 1.0 / class_metric.code_line if class_metric else None,
+                FeatureType.F28: class_metric.method_num if class_metric else None,
+                FeatureType.F29: package_metric.method_num if package_metric else None,
+                FeatureType.F31: package_metric.class_num if package_metric else None,
+                FeatureType.F32: indentation,
+                FeatureType.F33: method_metric.complexity if method_metric else None
             }
             return pd.Series(result)
 

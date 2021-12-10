@@ -1,6 +1,7 @@
 import pandas as pd
 
 from Logger import LOG
+from model import FeatureType
 from .FeatureCategory import FeatureCategory
 
 
@@ -22,19 +23,19 @@ class WarningChr(FeatureCategory):
         """
         F90 warning type
         """
-        return self._warning_property("type")
+        return self._warning_property("type", FeatureType.F90)
 
     def _warning_priority(self) -> pd.Series:
         """
         F91 warning priority
         """
-        return self._warning_property("priority")
+        return self._warning_property("priority", FeatureType.F91)
 
     def _warning_rank(self) -> pd.Series:
         """
         F92 warning rank
         """
-        return self._warning_property("rank")
+        return self._warning_property("rank", FeatureType.F92)
 
     def _num_in_method(self) -> pd.Series:
         """
@@ -42,7 +43,7 @@ class WarningChr(FeatureCategory):
         """
         method_num = self.alarm_df.groupby(["class_name", "method"])["version"].count()
         series = self.alarm_df.apply(lambda row: method_num[(row["class_name"], row["method"])], axis=1)
-        series.name = "warning_num_method"
+        series.name = FeatureType.F94
         return series
 
     def _num_in_class(self) -> pd.Series:
@@ -53,7 +54,7 @@ class WarningChr(FeatureCategory):
         self.alarm_df["class"] = self.alarm_df["class_name"].map(lambda s: s.split("$")[0])
         class_num = self.alarm_df.groupby("class")["version"].count()
         series = self.alarm_df["class"].map(lambda s: class_num[s])
-        series.name = "warning_num_class"
+        series.name = FeatureType.F95
         return series
 
     def _num_in_package(self) -> pd.Series:
@@ -64,13 +65,13 @@ class WarningChr(FeatureCategory):
         self.alarm_df["package"] = self.alarm_df["class_name"].map(lambda s: ".".join(s.split(".")[:-1]))
         package_num = self.alarm_df.groupby("package")["version"].count()
         series = self.alarm_df["package"].map(lambda s: package_num[s])
-        series.name = "warning_num_package"
+        series.name = FeatureType.F96
         return series
 
-    def _warning_property(self, column: str) -> pd.Series:
+    def _warning_property(self, column: str, feature_type: str) -> pd.Series:
         """
         获取警告自身属性列
         """
         series = self.alarm_df[column].copy()
-        series.name = "warning_" + column
+        series.name = feature_type
         return series
