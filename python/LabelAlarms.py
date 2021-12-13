@@ -19,6 +19,7 @@ if __name__ == "__main__":
         for index, label in alarm_labels.items():
             alarm_df.at[index, "label"] = label
         count_df = alarm_df.groupby("label").count()["version"]
-        LOG.info("TP: {0}, FP: {1}, UNKNOWN: {2}".format(count_df[Alarm.TP], count_df[Alarm.FP], count_df[Alarm.UNKNOWN]))
+        LOG.info("TP: {0}, FP: {1}, UNKNOWN: {2}".format(
+            count_df.get(Alarm.TP, default=0), count_df.get(Alarm.FP, default=0), count_df.get(Alarm.UNKNOWN, default=0)))
         # 保存结果
         alarm_df.to_csv(PathUtils.report_path(project_config.name + ".csv"))

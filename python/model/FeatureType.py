@@ -1,4 +1,14 @@
 class FeatureType(object):
+    """
+    保存代码中使用的所有特征类型，变量名以F开头
+    """
+
+    @staticmethod
+    def to_list():
+        """
+        :return: 所有特征类型名称
+        """
+        return list(filter(lambda s: s.startswith("F"), dir(FeatureType)))
 
     # --- Code Characteristic ---
     # *注：原论文中的文件级别均被替换为类级别
