@@ -4,4 +4,4 @@
 from .NeverStop import NeverStop
 from .StopBase import StopBase
 
-__all__ = [NeverStop, StopBase]
+__all__ = ["NeverStop", "StopBase"]

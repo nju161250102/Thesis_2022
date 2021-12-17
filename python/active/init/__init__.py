@@ -5,4 +5,4 @@ from .InitSampleBase import InitSampleBase
 from .RandomInitSample import RandomInitSample
 from .KMeansInitSample import KMeansInitSample
 
-__all__ = [InitSampleBase, RandomInitSample, KMeansInitSample]
+__all__ = ["InitSampleBase", "RandomInitSample", "KMeansInitSample"]

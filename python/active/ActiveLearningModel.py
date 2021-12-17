@@ -2,11 +2,12 @@ import pandas as pd
 from sklearn.metrics import *
 
 from Logger import LOG
-from model import Alarm
+from model import Alarm, FeatureType
 from .init import *
 from .model import *
 from .query import *
 from .stop import *
+from .DataHandler import DataHandler
 
 
 class ActiveLearningModel(object):
@@ -23,8 +24,10 @@ class ActiveLearningModel(object):
         self.data_df["model_label"] = pd.Series(Alarm.UNKNOWN, index=self.data_df.index)
         self.data_df.dropna(inplace=True)
         self.data_df = self.data_df[self.data_df["label"] != Alarm.UNKNOWN]
-        # TODO 待删除
-        self.data_df.drop("warning_type", axis=1, inplace=True)
+        # 数据预处理
+        use_features = {FeatureType.F23, FeatureType.F95, FeatureType.F96, FeatureType.F92, FeatureType.F21, FeatureType.F29, FeatureType.F31}
+        self.data_handler = DataHandler(use_features)
+        # self.data_handler = DataHandler()
         # 组件默认配置
         default_config = {
             "init_sample": {
@@ -78,11 +81,13 @@ class ActiveLearningModel(object):
                 break
             # 获取训练集和标签
             train_df = self.data_df.loc[labeled_index_set]
+            train_data, train_label, _ = self.data_handler.preprocess(train_df, True)
             # 模型训练
-            self.learn_model.train(train_df)
+            self.learn_model.train(train_data, train_label)
             # 对所有样本的预测结果
-            self.data_df["model_label"] = self.learn_model.predict_label(self.data_df)
-            prob_series = self.learn_model.predict_prob(self.data_df)
+            pre_data, y_true, _ = self.data_handler.preprocess(self.data_df, False)
+            self.data_df["model_label"] = pd.Series(self.learn_model.predict_label(pre_data), self.data_df.index)
+            prob_series = pd.Series(self.learn_model.predict_prob(pre_data), self.data_df.index)
             # 使用查询策略得到下一批标记的数据
             label_index = self.query_strategy.query(labeled_index_set, prob_series)
             labeled_index_set = labeled_index_set.union(set(label_index.to_list()))
@@ -90,18 +95,10 @@ class ActiveLearningModel(object):
             # 评估模型效果
             y_true = self.data_df["label"].to_numpy()
             y_pred = self.data_df["model_label"].to_numpy()
-            tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-            self.metrics_records.append({
-                "index": batch_num,
-                "labeled": len(labeled_index_set),
-                "accuracy": accuracy_score(y_true, y_pred),
-                "f1": f1_score(y_true, y_pred),
-                "precision": precision_score(y_true, y_pred, zero_division=0),
-                "recall": recall_score(y_true, y_pred)
-            })
-            LOG.info(confusion_matrix(y_true, y_pred).ravel())
+            self.metrics_records.append(self._evaluate(y_true, y_pred))
+            LOG.info(str(len(unlabeled_index_set)) + "\n" + str(self.metrics_records[-1]))
             batch_num += 1
-            break
+            # break
 
     @staticmethod
     def _build_init_sample(config: dict) -> InitSampleBase:
@@ -124,10 +121,27 @@ class ActiveLearningModel(object):
         """
         设置机器学习模型
         """
-        return SvmModel()
+        if config["name"] == "one_class_svm":
+            return OneClassSvmModel()
+        return MultiplyClassModel(config["name"])
 
     def _build_query_strategy(self, config: dict):
         """
         设置查询策略
         """
         return UncertainlyQuery(self.data_df, config["max_num"])
+
+    @staticmethod
+    def _evaluate(y_true, y_pred):
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        return {
+            "tn": tn,
+            "fp": fp,
+            "fn": fn,
+            "tp": tp,
+            "accuracy": accuracy_score(y_true, y_pred),
+            "f1": f1_score(y_true, y_pred),
+            "precision": precision_score(y_true, y_pred, zero_division=0),
+            "recall": recall_score(y_true, y_pred),
+            "mcc": matthews_corrcoef(y_true, y_pred)
+        }

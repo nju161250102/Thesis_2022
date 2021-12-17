@@ -1,4 +1,5 @@
 from .ModelBase import ModelBase
-from .SvmModel import SvmModel
+from .MultiplyClassModel import MultiplyClassModel
+from .OneClassSvmModel import OneClassSvmModel
 
-__all__ = [ModelBase, SvmModel]
+__all__ = ["ModelBase", "MultiplyClassModel", "OneClassSvmModel"]

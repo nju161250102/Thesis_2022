@@ -22,7 +22,7 @@ class KMeansInitSample(InitSampleBase):
         self.data_handler = DataHandler()
 
     def get_sample_index(self, data_df: pd.DataFrame) -> pd.Index:
-        data_x, _ = self.data_handler.preprocess(data_df, True)
+        data_x, _, _ = self.data_handler.preprocess(data_df, True)
         distances = KMeans(n_clusters=self.cluster_n).fit_transform(data_x)
         min_index = np.argmin(distances, axis=0)
         return data_df.iloc[min_index].index
