@@ -22,7 +22,9 @@ class CodeChr(FeatureCategory):
         project_path = PathUtils.project_path(project_name, version)
         report_path = PathUtils.report_path(project_name, "jhawk#" + version)
         if not PathUtils.exist_path("report", project_name, "jhawk#" + version + ".xml"):
-            CommandUtils.run_jhawk(project_path, report_path)
+            # 删除使用了枚举关键字的Java文件
+            exclude_files = CommandUtils.grep_enumeration(project_path)
+            CommandUtils.run_jhawk(project_path, report_path, exclude_files)
         # 完整包名 -> 度量指标
         self.package_map = {}
         # 完整类名 -> 度量指标
@@ -30,6 +32,8 @@ class CodeChr(FeatureCategory):
         # 完整类名.方法名 -> 度量指标
         self.method_map = {}
         # 从xml文件中读取度量数据
+        if not PathUtils.exist_path("report", project_name, "jhawk#" + version + ".xml"):
+            return
         xml_doc = ElementTree.parse(report_path + ".xml")
         for package_item in xml_doc.iterfind("./Packages/Package"):
             self.package_map[package_item.findtext("Name")] = PackageMetric(package_item.find("Metrics"))

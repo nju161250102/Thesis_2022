@@ -8,7 +8,7 @@ class FeatureType(object):
         """
         :return: 所有特征类型名称
         """
-        return list(filter(lambda s: s.startswith("F"), dir(FeatureType)))
+        return list(map(lambda s: getattr(FeatureType, s), filter(lambda s: s.startswith("F"), dir(FeatureType))))
 
     # --- Code Characteristic ---
     # *注：原论文中的文件级别均被替换为类级别

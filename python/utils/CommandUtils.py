@@ -13,18 +13,20 @@ class CommandUtils(object):
     """
 
     @staticmethod
-    def run(command: str, path=None) -> List[str]:
+    def run(command: str, path=None, out=False) -> List[str]:
         """
         切换到指定目录下并执行命令
         :param command: 命令
         :param path: 需要切换的路径
+        :param out: 是否打印命令语句
         :return: 按行划分的命令执行结果
         """
-        LOG.info(command if path is None else path + ": " + command)
+        if out:
+            LOG.info(command if path is None else path + ": " + command)
         if path is not None:
             os.chdir(path)
         with os.popen(command) as p:
-            return p.readlines()
+            return [s.strip() for s in p.readlines()]
 
     @staticmethod
     def run_findbugs(jar_path: str, report_path: str):
@@ -37,14 +39,19 @@ class CommandUtils(object):
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
 
     @staticmethod
-    def run_jhawk(project_path: str, report_path: str):
+    def run_jhawk(project_path: str, report_path: str, exclude_files: List[str]):
         """
         使用JHawk命令行工具计算代码度量，并输出为xml文件
         :param project_path: 扫描项目路径
         :param report_path: 度量报告保存路径 [注意：末尾不需要.xml后缀名]
+        :param exclude_files: 排除不扫描的文件路径列表
         """
-        CommandUtils.run("java -jar {0}/JHawkCommandLine.jar -x {1} -f .*\.java -r -s {2} -l pcm -a -p {0}/jhawk.properties".
-                         format(Config.JHAWK_PATH, report_path, project_path))
+        CommandUtils.run("java -jar {0}/JHawkCommandLine.jar -x {1} -f .*\.java -r -s {2} -l pcm -a -p {0}/jhawk.properties -xf \"\\Q{3}\\E\"".
+                         format(Config.JHAWK_PATH, report_path, project_path, "\\E|\\Q".join(exclude_files)))
+
+    @staticmethod
+    def grep_enumeration(project_path: str) -> List[str]:
+        return CommandUtils.run('grep -w "enum" {0} -r -l'.format(project_path))
 
     @staticmethod
     def reformat_java(file_path: str, save_path: str, lines: List[int]) -> List[int]:

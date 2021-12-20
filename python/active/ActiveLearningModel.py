@@ -22,8 +22,7 @@ class ActiveLearningModel(object):
         """
         self.data_df = data_df.copy()
         self.data_df["model_label"] = pd.Series(Alarm.UNKNOWN, index=self.data_df.index)
-        self.data_df.dropna(inplace=True)
-        self.data_df = self.data_df[self.data_df["label"] != Alarm.UNKNOWN]
+        self.data_df = DataHandler.cleanse(self.data_df)
         # 数据预处理
         use_features = {FeatureType.F23, FeatureType.F95, FeatureType.F96, FeatureType.F92, FeatureType.F21, FeatureType.F29, FeatureType.F31}
         self.data_handler = DataHandler(use_features)

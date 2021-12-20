@@ -3,9 +3,9 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 
-from sklearn.preprocessing import MinMaxScaler, PowerTransformer, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, PowerTransformer, StandardScaler, FunctionTransformer
 
-from model import Alarm, FeatureType
+from model import Alarm, FeatureType, WarningType
 
 
 class DataHandler(object):
@@ -16,12 +16,13 @@ class DataHandler(object):
             MinMaxScaler(): [FeatureType.F21, FeatureType.F32, FeatureType.F92],
             PowerTransformer(method="box-cox"): [FeatureType.F19, FeatureType.F20, FeatureType.F33],
             PowerTransformer(method="yeo-johnson"): [FeatureType.F22],
-            StandardScaler(): [FeatureType.F28, FeatureType.F29, FeatureType.F31, FeatureType.F94, FeatureType.F95, FeatureType.F96]
+            StandardScaler(): [FeatureType.F28, FeatureType.F29, FeatureType.F31, FeatureType.F94, FeatureType.F95, FeatureType.F96],
+            FunctionTransformer(func=WarningType.to_int, inverse_func=WarningType.parse): [FeatureType.F90]
         }
         # 所有特征列名，默认为全部
         self.all_columns = all_columns if all_columns else set(FeatureType.to_list())
         # 需要去除的列名
-        self.remove_columns = ["warning_type", "label"]
+        self.remove_columns = ["label"]
 
     @staticmethod
     def cleanse(data_df: pd.DataFrame):
