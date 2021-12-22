@@ -3,7 +3,7 @@
 """
 import pandas as pd
 
-from feature import CodeChr, WarningChr
+from feature import *
 from utils import PathUtils, JsonUtils
 
 if __name__ == "__main__":
@@ -12,9 +12,11 @@ if __name__ == "__main__":
         result_df = pd.DataFrame()
         for version, group_df in df.groupby("version"):
             feature_df = pd.DataFrame(index=group_df.index)
+            code_anl_df = CodeAnl(group_df, project_config.name, version).get_feature_df()
             code_chr_df = CodeChr(group_df, project_config.name, version).get_feature_df()
             warning_chr_df = WarningChr(group_df, project_config.name, version).get_feature_df()
             # 合并不同类的特征DataFrame
+            feature_df = feature_df.join(code_anl_df)
             feature_df = feature_df.join(code_chr_df)
             feature_df = feature_df.join(warning_chr_df)
             # 合并到项目整体DataFrame

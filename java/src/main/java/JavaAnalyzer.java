@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.*;
 import lombok.Data;
 import model.ClassInfo;
 import model.MethodInfo;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ public class JavaAnalyzer {
     public JavaAnalyzer(String projectPath) {
         try {
             Files.walk(Paths.get(projectPath))
+                    .filter(p -> "java".equals(FilenameUtils.getExtension(p.toString())))
                     .forEach(this::accept);
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,11 +137,11 @@ public class JavaAnalyzer {
      * @param node 节点
      * @return 节点属于的类节点
      */
-    private ClassOrInterfaceDeclaration findParentClass(Node node) {
+    private <T extends TypeDeclaration<T>> T findParentClass(Node node) {
         while (node != null) {
             node = node.getParentNode().orElse(null);
-            if (node instanceof ClassOrInterfaceDeclaration) {
-                return (ClassOrInterfaceDeclaration) node;
+            if (node instanceof ClassOrInterfaceDeclaration || node instanceof EnumDeclaration) {
+                return (T) node;
             }
         }
         return null;

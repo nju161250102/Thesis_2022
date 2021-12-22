@@ -33,6 +33,29 @@ class FeatureType(object):
     # F33 cyclomatic complexity
     F33 = "code_cyclomatic_complexity"
 
+    # --- Code Analysis ---
+    # F84 method visibility
+    F84_public = "method_visibility_public"
+    F84_default = "method_visibility_default"
+    F84_protected = "method_visibility_protected"
+    F84_private = "method_visibility_private"
+    # F85 return type
+    F85 = "return_type"
+    # F86 is static/final/abstract/protected
+    F86_static = "method_static"
+    F86_final = "method_final"
+    F86_abstract = "method_abstract"
+    F86_protected = "method_protected"
+    # F87 class visibility
+    F87_public = "class_visibility_public"
+    F87_default = "class_visibility_default"
+    F87_protected = "class_visibility_protected"
+    F87_private = "class_visibility_private"
+    # F88 is abstract/interface/enum class
+    F88_abstract = "class_abstract"
+    F88_interface = "class_interface"
+    F88_enum = "class_enum"
+
     # --- Warning Characteristics ---
     # F90 warning type
     F90 = "warning_type"

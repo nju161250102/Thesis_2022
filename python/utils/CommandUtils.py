@@ -1,10 +1,9 @@
 import json
 import os
-from typing import List
+from typing import List, Dict
 
 from Config import Config
 from Logger import LOG
-from model import Alarm
 
 
 class CommandUtils(object):
@@ -73,7 +72,11 @@ class CommandUtils(object):
             return [-1] * len(lines)
 
     @staticmethod
-    def method_analyse(project_path: str, alarm: Alarm):
-        cmd_result = CommandUtils.run("java -jar {0} method {1} \"{2}\"".format(
-            Config.JAVATOOLS_PATH, project_path, json.dumps(alarm.__dict__, separators=(',', ':')).replace('"', '\\"')))
-        print(cmd_result[0])
+    def analyse_project(project_path: str) -> Dict[str, dict]:
+        """
+        调用Jar分析项目下类和方法的属性
+        :param project_path: 项目路径
+        :return: [类/方法的完全限定名: 属性字典]
+        """
+        cmd_result = CommandUtils.run("java -jar {0} analyse {1}".format(Config.JAVATOOLS_PATH, project_path))
+        return {cmd_result[2 * i]: json.loads(cmd_result[2 * i + 1]) for i in range(int(len(cmd_result) / 2))}
