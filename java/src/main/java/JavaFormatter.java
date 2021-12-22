@@ -20,18 +20,15 @@ public class JavaFormatter {
 
     /**
      * 对java文件重新格式化，并找到处理后代码行的位置
-     * @param path 文件路径
+     * @param originalPath 原始文件路径
+     * @param newPath 修改后的文件路径
      * @param lines 原文件中代码行位置
      * @return 处理后代码行的位置
      */
-    public static List<Integer> formatFile(Path path, List<Integer> lines) {
+    public static List<Integer> formatFile(Path originalPath, Path newPath, List<Integer> lines) {
         try {
-            // 文件复制一份副本
-            String fileName = path.getFileName().toString();
-            Path newFilePath = path.getParent().resolve("_" + fileName);
-            FileUtils.copyFile(path.toFile(), newFilePath.toFile());
             // 开始处理
-            CompilationUnit cu = StaticJavaParser.parse(path);
+            CompilationUnit cu = StaticJavaParser.parse(originalPath);
             List<Integer> result = lines.stream()
                     .map(line -> {
                         // 保存目标节点
@@ -61,11 +58,14 @@ public class JavaFormatter {
             if (result.stream().anyMatch(i -> i != -1)) {
                 cu.removeComment().getAllContainedComments().forEach(Comment::remove);
                 String[] original_lines = cu.toString().split("\n");
-                FileUtils.writeLines(path.toFile(), Arrays.asList(original_lines));
+                // 创建新文件并保存内容
+                FileUtils.forceMkdirParent(newPath.toFile());
+                FileUtils.touch(newPath.toFile());
+                FileUtils.writeLines(newPath.toFile(), Arrays.asList(original_lines));
             }
             return result;
         } catch (IOException e) {
-            log.error("Parse java file error: " + path);
+            log.error("Parse java file error: " + originalPath);
             e.printStackTrace();
             return Collections.nCopies(-1, lines.size());
         }
