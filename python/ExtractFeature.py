@@ -15,10 +15,12 @@ if __name__ == "__main__":
             code_anl_df = CodeAnl(group_df, project_config.name, version).get_feature_df()
             code_chr_df = CodeChr(group_df, project_config.name, version).get_feature_df()
             warning_chr_df = WarningChr(group_df, project_config.name, version).get_feature_df()
+            warning_cmb_df = WarningCmb(group_df, project_config.name, version).get_feature_df()
             # 合并不同类的特征DataFrame
             feature_df = feature_df.join(code_anl_df)
             feature_df = feature_df.join(code_chr_df)
             feature_df = feature_df.join(warning_chr_df)
+            feature_df = feature_df.join(warning_cmb_df)
             # 合并到项目整体DataFrame
             result_df = result_df.append(feature_df)
         result_df["label"] = df["label"]

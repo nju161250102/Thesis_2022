@@ -30,6 +30,16 @@ class WarningType(object):
         """
         return WarningType.type_list[type_num]
 
+    @staticmethod
+    def _get_kind_dict() -> dict:
+        result = {}
+        for pattern, kind in WarningType.type_dict.items():
+            if kind in result.keys():
+                result[kind].append(pattern)
+            else:
+                result[kind] = [pattern]
+        return result
+
     type_dict = {
         "BC_EQUALS_METHOD_SHOULD_WORK_FOR_ALL_OBJECTS": "BC",
         "BIT_SIGNED_CHECK": "BIT",
@@ -457,3 +467,9 @@ class WarningType(object):
         "XFB_XML_FACTORY_BYPASS": "XFB"
     }
     type_list = list(type_dict.keys())
+    kind_dict = {}
+    for pattern, kind in type_dict.items():
+        if kind in kind_dict.keys():
+            kind_dict[kind].append(pattern)
+        else:
+            kind_dict[kind] = [pattern]

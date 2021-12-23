@@ -69,3 +69,13 @@ class FeatureType(object):
     F95 = "warning_num_class"
     # F96 number of warnings in the package
     F96 = "warning_num_package"
+
+    # --- Warning Combination ---
+    # F112 defect likelihood for warning pattern
+    F112 = "warning_pattern_likelihood"
+    # F113 variance of likelihood
+    F113 = "warning_likelihood_variance"
+    # F114 defect likelihood for warning type
+    F114 = "warning_type_likelihood"
+    # F115 discretization of defect likelihood
+    F115 = "warning_likelihood_discretization"

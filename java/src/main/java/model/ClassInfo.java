@@ -7,7 +7,7 @@ public class ClassInfo {
 
     // 可见性
     private boolean isPublic = false;
-    private boolean isDefault = true;
+    private boolean isDefault = false;
     private boolean isProtected = false;
     private boolean isPrivate = false;
     // 修饰符

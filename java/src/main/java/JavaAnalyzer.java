@@ -105,6 +105,9 @@ public class JavaAnalyzer {
                     info.setProtected(true);
             }
         }
+        if (!(info.isPrivate() || info.isProtected() || info.isPublic())) {
+            info.setDefault(true);
+        }
         return info;
     }
 
@@ -128,6 +131,9 @@ public class JavaAnalyzer {
                 case PROTECTED:
                     info.setProtected(true);
             }
+        }
+        if (!(info.isPrivate() || info.isProtected() || info.isPublic())) {
+            info.setDefault(true);
         }
         return info;
     }
