@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import pandas as pd
 from pandas.api.types import CategoricalDtype
@@ -23,10 +23,10 @@ class AlarmClassifier(object):
         self.alarm_df = self.alarm_df[self.alarm_df["new_location"] != -1]
         self.alarm_df["version"] = self.alarm_df["version"].astype(self.version_type)
 
-    def handle(self) -> Dict[str, int]:
+    def handle(self) -> Tuple[Dict[str, int], Dict[str, str]]:
         """
         不同版本扫描报告中的警告标记出正误报
-        :return: 警告ID到标签的关系
+        :return: 警告ID到标签，警告ID到下一个警告的ID
         """
         alarm_groups = []
         # 首先，在不同版本的警告中找出相同的警告
@@ -76,12 +76,18 @@ class AlarmClassifier(object):
         df = pd.DataFrame(alarm_flag_list, columns=self.versions)
         df.to_csv(PathUtils.report_path("temp.csv"))
         # 合并所有标记后的警告
-        result = {}
+        label_result = {}
+        next_result = {}
         for alarm_group in alarm_groups:
-            for alarm in alarm_group:
-                # 如果警告标记冲突，重新标为不确定
-                if alarm.index in result.keys() and result[alarm.index] != alarm.label:
-                    result[alarm.index] = Alarm.UNKNOWN
+            for i, alarm in enumerate(alarm_group):
+                # 记录下一个警告ID
+                if i < len(alarm_group) - 1:
+                    next_result[alarm.index] = alarm_group[i + 1].index
                 else:
-                    result[alarm.index] = alarm.label
-        return result
+                    next_result[alarm.index] = ""
+                # 如果警告标记冲突，重新标为不确定
+                if alarm.index in label_result.keys() and label_result[alarm.index] != alarm.label:
+                    label_result[alarm.index] = Alarm.UNKNOWN
+                else:
+                    label_result[alarm.index] = alarm.label
+        return label_result, next_result

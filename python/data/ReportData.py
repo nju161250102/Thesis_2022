@@ -119,6 +119,7 @@ class ReportData(object):
         for project, project_config in config.items():
             df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
             PathUtils.rebuild_dir(PathUtils.file_path(project_config.name))
+            LOG.info("Read project: " + project_config.name)
             # 以每个版本中的每个文件为单位进行处理
             for index, group_df in df.groupby(["path", "version"]):
                 lines = group_df["location"].tolist()

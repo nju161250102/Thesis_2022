@@ -36,6 +36,8 @@ class Alarm(object):
         self.label = Alarm.UNKNOWN
         # 所在版本
         self.version = ""
+        # 下一个版本相同警告的ID
+        self.next = ""
 
     def __eq__(self, other):
         if type(other) == type(self):
