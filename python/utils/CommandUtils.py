@@ -38,6 +38,15 @@ class CommandUtils(object):
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
 
     @staticmethod
+    def run_spotbugs(jar_path: str, report_path: str):
+        """
+        使用Findbugs扫描得到xml格式的扫描报告
+        :param jar_path: 目标Jar路径
+        :param report_path: 扫描报告保存路径
+        """
+        CommandUtils.run("java -jar {0} -textui -low -sortByClass -xml:withMessages={1} -quiet {2}".
+                         format(Config.FINDBUGS_PATH, report_path, jar_path))
+    @staticmethod
     def run_jhawk(project_path: str, report_path: str, exclude_files: List[str]):
         """
         使用JHawk命令行工具计算代码度量，并输出为xml文件

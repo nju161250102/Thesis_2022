@@ -10,6 +10,16 @@ class FeatureType(object):
         """
         return list(map(lambda s: getattr(FeatureType, s), filter(lambda s: s.startswith("F"), dir(FeatureType))))
 
+    @staticmethod
+    def to_id(feature: str) -> str:
+        """
+        :return: 特征对应的编号
+        """
+        for f in filter(lambda s: s.startswith("F"), dir(FeatureType)):
+            if getattr(FeatureType, f) == feature:
+                return f
+        return ""
+
     # --- Code Characteristic ---
     # *注：原论文中的文件级别均被替换为类级别
     # F19 number of non-comment source code statements in method

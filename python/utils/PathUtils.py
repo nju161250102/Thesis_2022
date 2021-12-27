@@ -64,4 +64,10 @@ class PathUtils(object):
         """
         return os.path.join(Config.DATA_DIR, "feature", *path_args)
 
+    @staticmethod
+    def picture_path(*path_args):
+        """
+        输出图片目录下路径拼接
+        """
+        return os.path.join(Config.DATA_DIR, "pic", *path_args)
 

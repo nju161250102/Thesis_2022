@@ -29,7 +29,7 @@ class ReportData(object):
             if PathUtils.exist_path("report", config.name, version.number + ".xml"):
                 continue
             target_jar = PathUtils.project_path(config.name, version.target)
-            CommandUtils.run_findbugs(target_jar, PathUtils.report_path(config.name, version.number + ".xml"))
+            CommandUtils.run_spotbugs(target_jar, PathUtils.report_path(config.name, version.number + ".xml"))
             LOG.info("Scan version: " + version.number)
 
     @staticmethod
