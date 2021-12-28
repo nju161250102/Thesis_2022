@@ -50,7 +50,7 @@ def check_common_features(df: pd.DataFrame, feature_list: List[str]):
         threshold_list.append(clf.tree_.threshold[0])
         metric_list.append(f1_score(y_data, y_predict))
     original_threshold_list = transformer.inverse_transform(np.array([threshold_list]))[0]
-    return metric_list, original_threshold_list
+    return metric_list, original_threshold_list.tolist()
 
 
 def check_boolean_feature(df: pd.DataFrame, feature_list: List[str]):
@@ -76,7 +76,7 @@ def check_boolean_feature(df: pd.DataFrame, feature_list: List[str]):
 
 if __name__ == "__main__":
     common_feature_list = [FeatureType.F19, FeatureType.F20, FeatureType.F21, FeatureType.F22, FeatureType.F23, FeatureType.F28, FeatureType.F29, FeatureType.F31, FeatureType.F33]
-    boolean_feature_list = list(filter(lambda s: s.split("_")[0] in ["F84", "F86", "F87", "F88"], FeatureType.to_list()))
+    boolean_feature_list = list(filter(lambda s: FeatureType.to_id(s).split("_")[0] in ["F84", "F86", "F87", "F88"], FeatureType.to_list()))
     metric_df = pd.DataFrame(columns=common_feature_list + boolean_feature_list)
     threshold_df = pd.DataFrame(columns=common_feature_list + boolean_feature_list)
     for project_config in JsonUtils.read_projects(PathUtils.join_path("project.json")).values():
@@ -93,5 +93,5 @@ if __name__ == "__main__":
         metric_df.loc[project_config.name] = m1 + m2
         threshold_df.loc[project_config.name] = t1 + t2
     # 保存结果
-    metric_df.to_csv(PathUtils.feature_path("feature_metric.csv"), index=False)
-    threshold_df.to_csv(PathUtils.feature_path("feature_threshold.csv"), index=False)
+    metric_df.to_csv(PathUtils.feature_path("feature_metric.csv"), index=True)
+    threshold_df.to_csv(PathUtils.feature_path("feature_threshold.csv"), index=True)

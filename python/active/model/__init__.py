@@ -1,5 +1,6 @@
 from .ModelBase import ModelBase
-from .MultiplyClassModel import MultiplyClassModel
+from .BaggingClassifierModel import BaggingClassifierModel
+from .MultiplyClassifierModel import MultiplyClassifierModel
 from .OneClassSvmModel import OneClassSvmModel
 
-__all__ = ["ModelBase", "MultiplyClassModel", "OneClassSvmModel"]
+__all__ = ["ModelBase", "BaggingClassifierModel", "MultiplyClassifierModel", "OneClassSvmModel"]

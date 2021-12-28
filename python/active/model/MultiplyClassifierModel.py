@@ -1,30 +1,30 @@
 import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import CategoricalNB
+from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.calibration import CalibratedClassifierCV
 
 from .ModelBase import ModelBase
 
 
-class MultiplyClassModel(ModelBase):
+class MultiplyClassifierModel(ModelBase):
     """
     Multiply Class Machine Model in scikit-learn
     """
 
     def __init__(self, name: str):
         model_dict = {
-            "svm": CalibratedClassifierCV(base_estimator=LinearSVC()),
+            "svm": CalibratedClassifierCV(base_estimator=LinearSVC(max_iter=20000)),
             "dt": DecisionTreeClassifier(),
-            "nb": CategoricalNB(),
+            "nb": GaussianNB(),
             "mlp": MLPClassifier(max_iter=1000)
         }
         # 默认的分类器
         if name not in model_dict.keys():
             name = "svm"
         self.model = model_dict[name]
-        super().__init__("svm")
+        super().__init__(name)
 
     def train(self, x_data: np.ndarray, x_label: np.ndarray):
         self.model.fit(x_data, x_label)

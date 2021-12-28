@@ -59,7 +59,7 @@ class MavenData(object):
         versions = []
         req = requests.get(project_url)
         LOG.info("Start search project: " + project_name)
-        for match in re.finditer(r"<a(.*?)>(.*?)</a>(.*?)<", req.text, re.DOTALL):
+        for match in re.finditer(r"<a(.*?)>(.*?)</a>(.*?)\n", req.text, re.DOTALL):
             if match.groups()[2].strip() != "":
                 groups = re.search(r"(.+?)( {2,})(.+?)", match.groups()[2].strip()).groups()
                 # 匹配结果：日期时间 空白 文件大小
