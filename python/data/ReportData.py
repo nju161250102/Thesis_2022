@@ -76,6 +76,9 @@ class ReportData(object):
                     # 保存有精确漏洞行的警告，可能存在多个
                     for line_node in item.iterfind("SourceLine"):
                         if line_node.get("classname") == alarm.class_name:
+                            # [可能没有start和end]
+                            if line_node.get("start") is None or line_node.get("end") is None:
+                                continue
                             start = int(line_node.get("start"))
                             end = int(line_node.get("end"))
                             # [不同的SourceLine可能会出现相同的行号，需要避免重复添加]

@@ -12,7 +12,7 @@ from .DataHandler import DataHandler
 
 class ActiveLearningModel(object):
 
-    def __init__(self, data_df: pd.DataFrame, config=None):
+    def __init__(self, data_df: pd.DataFrame, next_dict: dict, config=None):
         """
         初始化主动学习模型
         data_df 只包含index和特征
@@ -22,7 +22,7 @@ class ActiveLearningModel(object):
         """
         self.data_df = data_df.copy()
         self.data_df["model_label"] = pd.Series(Alarm.UNKNOWN, index=self.data_df.index)
-        self.data_df = DataHandler.cleanse(self.data_df)
+        self.data_df = self.data_df.dropna()
         # 数据预处理
         use_features = {FeatureType.F23, FeatureType.F95, FeatureType.F96, FeatureType.F92, FeatureType.F21, FeatureType.F29, FeatureType.F31}
         self.data_handler = DataHandler(use_features)
@@ -57,6 +57,8 @@ class ActiveLearningModel(object):
         self.stop_strategy = self._build_stop_strategy(default_config["stop_strategy"])
         # 实验度量记录
         self.metrics_records = []
+        # 实验采样排序
+        self.sample_records = []
 
     def run(self):
         # 输出实验配置
@@ -69,9 +71,11 @@ class ActiveLearningModel(object):
         # 参数初始化
         batch_num = 1
         self.metrics_records.clear()
+        self.sample_records.clear()
         # 初始化采样标记一部分数据，剩下的为未标记数据
         labeled_index_set = set(self.init_sample.get_sample_index(self.data_df))
         unlabeled_index_set = set(self.data_df.index.tolist()).difference(labeled_index_set)
+        self.sample_records.extend(labeled_index_set)
         # 开始主动学习步骤
         while len(unlabeled_index_set) > 0:
             # 根据停止策略决定是否终止主动学习循环
@@ -91,11 +95,19 @@ class ActiveLearningModel(object):
             label_index = self.query_strategy.query(labeled_index_set, prob_series)
             labeled_index_set = labeled_index_set.union(set(label_index.to_list()))
             unlabeled_index_set = unlabeled_index_set.difference(set(label_index.to_list()))
+            self.sample_records.extend(label_index.to_list())
+            if len(unlabeled_index_set) < 100:
+                break
             # 评估模型效果
-            y_true = self.data_df["label"].to_numpy()
-            y_pred = self.data_df["model_label"].to_numpy()
-            self.metrics_records.append(self._evaluate(y_true, y_pred))
-            LOG.info(str(len(unlabeled_index_set)) + "\n" + str(self.metrics_records[-1]))
+            unlabeled_y_true = self.data_df.loc[unlabeled_index_set]["label"].to_numpy()
+            unlabeled_y_pred = self.data_df.loc[unlabeled_index_set]["model_label"].to_numpy()
+            labeled_y_true = self.data_df.loc[labeled_index_set]["label"].to_numpy()
+            labeled_y_pred = self.data_df.loc[labeled_index_set]["model_label"].to_numpy()
+            d = {}
+            d.update(self._evaluate(unlabeled_y_true, unlabeled_y_pred, prefix="test_"))
+            d.update(self._evaluate(labeled_y_true, labeled_y_pred, prefix="train_"))
+            self.metrics_records.append(d)
+            LOG.info(str(len(unlabeled_index_set)))
             batch_num += 1
             # break
 
@@ -122,18 +134,22 @@ class ActiveLearningModel(object):
         """
         if config["name"] == "one_class_svm":
             return OneClassSvmModel()
-        return MultiplyClassModel(config["name"])
+        elif config["name"] == "bagging":
+            return BaggingClassifierModel()
+        return MultiplyClassifierModel(config["name"])
 
     def _build_query_strategy(self, config: dict):
         """
         设置查询策略
         """
+        if config["name"] == "certain_query":
+            return CertainlyQuery(self.data_df, config["max_num"])
         return UncertainlyQuery(self.data_df, config["max_num"])
 
     @staticmethod
-    def _evaluate(y_true, y_pred):
+    def _evaluate(y_true, y_pred, prefix="") -> dict:
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        return {
+        result = {
             "tn": tn,
             "fp": fp,
             "fn": fn,
@@ -144,3 +160,4 @@ class ActiveLearningModel(object):
             "recall": recall_score(y_true, y_pred),
             "mcc": matthews_corrcoef(y_true, y_pred)
         }
+        return dict(map(lambda t: (prefix + t[0], t[1]), result.items()))
