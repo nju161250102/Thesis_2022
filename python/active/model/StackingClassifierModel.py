@@ -36,7 +36,6 @@ def modified_fit_single_estimator(
     return estimator
 
 
-
 class StackingClassifierModel(ModelBase):
     """
     Bagging Classifier Model

@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.metrics import *
 
 from Logger import LOG
-from model import Alarm, FeatureType
+from model import Alarm
 from .init import *
 from .model import *
 from .query import *
@@ -12,7 +12,7 @@ from .DataHandler import DataHandler
 
 class ActiveLearningModel(object):
 
-    def __init__(self, data_df: pd.DataFrame, next_dict: dict, config=None):
+    def __init__(self, data_df: pd.DataFrame, config=None):
         """
         初始化主动学习模型
         data_df 只包含index和特征
@@ -24,9 +24,7 @@ class ActiveLearningModel(object):
         self.data_df["model_label"] = pd.Series(Alarm.UNKNOWN, index=self.data_df.index)
         self.data_df = self.data_df.dropna()
         # 数据预处理
-        use_features = {FeatureType.F23, FeatureType.F95, FeatureType.F96, FeatureType.F92, FeatureType.F21, FeatureType.F29, FeatureType.F31}
-        self.data_handler = DataHandler(use_features)
-        # self.data_handler = DataHandler()
+        self.data_handler = DataHandler()
         # 组件默认配置
         default_config = {
             "init_sample": {
@@ -66,8 +64,7 @@ class ActiveLearningModel(object):
         LOG.info("Init:  " + self.init_sample.name)
         LOG.info("Model: " + self.learn_model.name)
         LOG.info("Query: " + self.query_strategy.name)
-        LOG.info("Size:  " + str(len(self.data_df)))
-        LOG.info("TA:    " + str(len(self.data_df[self.data_df["label"] == Alarm.TP])))
+        LOG.info("Size:  " + str(len(self.data_df[self.data_df["label"] == Alarm.TP])) + "/" + str(len(self.data_df)))
         # 参数初始化
         batch_num = 1
         self.metrics_records.clear()
@@ -111,6 +108,15 @@ class ActiveLearningModel(object):
             batch_num += 1
             # break
 
+    def rank_labels(self, test_df: pd.DataFrame = None):
+        if test_df is None:
+            return self.data_df.loc[self.sample_records, "label"].to_list()
+        else:
+            test_data, test_label, _ = self.data_handler.preprocess(test_df, False)
+            test_df["rank_score"] = pd.Series(self.learn_model.predict_prob(test_data), test_df.index)
+            test_df.sort_values("rank_score", ascending=False, inplace=True)
+            return test_df["label"].to_list()
+
     @staticmethod
     def _build_init_sample(config: dict) -> InitSampleBase:
         """
@@ -136,6 +142,8 @@ class ActiveLearningModel(object):
             return OneClassSvmModel()
         elif config["name"] == "bagging":
             return BaggingClassifierModel()
+        elif config["name"] == "stacking":
+            return StackingClassifierModel()
         return MultiplyClassifierModel(config["name"])
 
     def _build_query_strategy(self, config: dict):

@@ -1,11 +1,11 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
 
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, StandardScaler, FunctionTransformer
 
-from model import Alarm, FeatureType, WarningType
+from model import FeatureType, WarningType
 
 
 class DataHandler(object):
@@ -13,26 +13,18 @@ class DataHandler(object):
     def __init__(self, all_columns=None):
         # 数据预处理
         self.preprocess_dict = {
-            MinMaxScaler(): [FeatureType.F21, FeatureType.F32, FeatureType.F92],
+            MinMaxScaler(feature_range=(-1, 1)): [FeatureType.F21, FeatureType.F32, FeatureType.F92],
             PowerTransformer(method="box-cox"): [FeatureType.F19, FeatureType.F20, FeatureType.F33],
             PowerTransformer(method="yeo-johnson"): [FeatureType.F22],
             StandardScaler(): [FeatureType.F28, FeatureType.F29, FeatureType.F31, FeatureType.F94, FeatureType.F95, FeatureType.F96],
-            FunctionTransformer(func=WarningType.to_int, inverse_func=WarningType.parse): [FeatureType.F90]
+            FunctionTransformer(func=np.frompyfunc(WarningType.to_int, 1, 1),
+                                inverse_func=np.frompyfunc(WarningType.parse, 1, 1),
+                                check_inverse=False): [FeatureType.F90]
         }
         # 所有特征列名，默认为全部
-        self.all_columns = all_columns if all_columns else set(FeatureType.to_list())
+        self.all_columns = all_columns if all_columns else set(FeatureType.to_str_list(FeatureType.to_list()))
         # 需要去除的列名
-        self.remove_columns = ["label"]
-
-    @staticmethod
-    def cleanse(data_df: pd.DataFrame):
-        """
-        数据清洗
-        :param data_df: 数据DataFrame
-        """
-        data_df = data_df.dropna()
-        data_df = data_df[data_df["label"] != Alarm.UNKNOWN]
-        return data_df
+        self.remove_columns = ["label", "model_label", FeatureType.F85.name]
 
     def preprocess(self, data_df: pd.DataFrame, need_fit: bool) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
@@ -47,8 +39,10 @@ class DataHandler(object):
         # 保存所有特征列
         all_columns = self.all_columns.union(set(data_df.columns.tolist()))
         for column in self.remove_columns:
-            all_columns.remove(column)
+            if column in all_columns:
+                all_columns.remove(column)
         for transformer, columns in self.preprocess_dict.items():
+            columns = FeatureType.to_str_list(columns)
             if len(columns) > 0:
                 transform_columns.extend(columns)
                 if need_fit:

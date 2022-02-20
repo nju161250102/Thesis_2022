@@ -68,7 +68,7 @@ class WarningChr(FeatureCategory):
         series.name = FeatureType.F96
         return series
 
-    def _warning_property(self, column: str, feature_type: str) -> pd.Series:
+    def _warning_property(self, column: str, feature_type) -> pd.Series:
         """
         获取警告自身属性列
         """
