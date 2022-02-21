@@ -114,4 +114,4 @@ class BaggingClassifierModel(ModelBase):
         return self.model.predict(x_data)
 
     def predict_prob(self, x_data: np.ndarray) -> np.ndarray:
-        return self.model.predict_proba(x_data)[:, 1]
+        return np.ones(x_data.shape[0]) - self.model.predict_proba(x_data)[:, 0]

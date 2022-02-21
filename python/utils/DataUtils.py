@@ -12,11 +12,18 @@ class DataUtils(object):
             yield DataUtils._read_report_df(project_config)
 
     @staticmethod
-    def train_and_test_df(project_config: ProjectConfig):
+    def iter_version_df(project_config: ProjectConfig):
+        """
+        遍历项目各版本数据
+        :param project_config: 项目配置
+        :return 版本名称, 之前的所有版本数据, 当前版本的数据
+        """
         report_df = DataUtils._read_report_df(project_config)
-        for i in range(1, len(project_config.select) - 1):
-            yield project_config.select[i], report_df[report_df["version"] < project_config.select[i]].copy(), \
-                  report_df[report_df["version"] == project_config.select[i]].copy()
+        for i in range(0, len(project_config.select) - 1):
+            # 如果是第一个版本，则只存在测试集
+            yield (project_config.select[i],
+                   None if i == 0 else report_df[report_df["version"] < project_config.select[i]].copy(),
+                   report_df[report_df["version"] == project_config.select[i]].copy())
 
     @staticmethod
     def to_feature_df(project_config: ProjectConfig, index: pd.Index):
