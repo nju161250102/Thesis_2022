@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/css/uikit.min.css"/>
+    <script src="/static/js/uikit.min.js"></script>
+    <script src="/static/js/uikit-icons.min.js"></script>
+    <title>漏洞扫描检测系统 - {{title}}</title>
+</head>
+<body>
+<nav class="uk-navbar-container" uk-navbar>
+    <div class="uk-navbar-left">
+        <span class="uk-text-large uk-text-center" style="padding-left: 20px">漏洞扫描检测系统</span>
+    </div>
+    <div class="uk-navbar-right">
+        <ul class="uk-navbar-nav">
+            {% for item in nav_list %}
+            {% if item.active %}
+            <li class="uk-active">
+                <a href="{{item.url}}">{{item.name}}</a>
+            </li>
+            {% else %}
+            <li>
+                <a href="{{item.url}}">{{item.name}}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            <li>
+                <a href="#">当前用户：{{username}}</a>
+                <div class="uk-navbar-dropdown" style="padding: 10px; margin: 0; width: 150px">
+                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                        <li class="uk-active">
+                            <a href="/logout">退出登录</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% block content %}{% endblock %}
+</body>
+</html>

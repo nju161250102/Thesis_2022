@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="uk-flex-center" uk-grid>
+    <div class="uk-card uk-card-body uk-width-3-4">
+        <form class="uk-form-stacked" method="post" action="/report">
+            <div class="uk-margin">
+                <label class="uk-form-label" for="project-select">项目名称/版本</label>
+                <div class="uk-form-controls uk-width-1-4">
+                    <select class="uk-select" id="project-select" name="project">
+                        {% for project in project_list %}
+                        <option value="{{project.id}}">{{project.name + "/" + project.version}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <input class="uk-button uk-width-1-6 uk-button-primary" type="submit" value="查看报告">
+            </div>
+        </form>
+        {% if alarm_list %}
+        <table class="uk-table uk-table-striped">
+            <thead>
+            <tr>
+                <th>类名</th>
+                <th>方法名</th>
+                <th>代码行</th>
+                <th>文件路径</th>
+                <th>标记时间</th>
+                <th>标记结果</th>
+                <th>审核人员</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>FuckThesis</td>
+                <td>test</td>
+                <td>12</td>
+                <td>/src/test/</td>
+                <td>1970-01-01 00:00:00</td>
+                <td>正报</td>
+                <td>Worker1</td>
+            </tr>
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

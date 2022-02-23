@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/css/uikit.min.css"/>
+    <script src="/static/js/uikit.min.js"></script>
+    <script src="/static/js/uikit-icons.min.js"></script>
+    <title>登录</title>
+</head>
+<body>
+<nav class="uk-navbar-container" uk-navbar>
+    <div class="uk-navbar-left">
+        <span class="uk-text-large uk-text-center" style="padding-left: 20px">漏洞扫描检测系统</span>
+    </div>
+    <div class="uk-navbar-right">
+        <ul class="uk-navbar-nav">
+            <li class="uk-active">
+                <a href="#">登录</a>
+            </li>
+            <li class="uk-active">
+                <a href="#">注册</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="uk-flex-center" uk-grid>
+    <div class="uk-card uk-card-body uk-width-1-4">
+        <form class="uk-form-stacked" method="post" action="/">
+            <fieldset class="uk-fieldset">
+                <legend class="uk-legend uk-text-center">登录</legend>
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="username-input">用户名</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="username-input" type="text" name="username" placeholder="此处输入用户名">
+                    </div>
+                </div>
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="password-input">密码</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="password-input" type="password" name="password" placeholder="请输入密码">
+                    </div>
+                </div>
+                {% if info %}
+                <span class="uk-form-danger">{{info}}</span>
+                {% endif %}
+                <div class="uk-margin ">
+                    <input class="uk-button uk-width-1-1 uk-button-primary" type="submit" value="登录">
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+
+</script>
