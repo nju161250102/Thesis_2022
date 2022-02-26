@@ -19,7 +19,7 @@ class PathUtils(object):
                 return False
             else:
                 shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
+        os.makedirs(dir_path)
         return True
 
     @staticmethod

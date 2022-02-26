@@ -186,8 +186,8 @@ def one_project_experiment(config: ProjectConfig, result: list):
                 info_dict.update(experiment_metric(label_list))
                 result.append(info_dict)
 
-            update_active_learning(train_label_list, "train")
-            update_active_learning(test_label_list, "test")
+            update_active_learning(train_label_list, "pre")
+            update_active_learning(test_label_list, "cur")
         # 保存当前结果
         pd.DataFrame(result).to_csv(PathUtils.join_path("result.csv"), index=False, encoding="utf-8")
     return result

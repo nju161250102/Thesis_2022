@@ -46,6 +46,7 @@ class CommandUtils(object):
         """
         CommandUtils.run("java -jar {0} -textui -low -sortByClass -xml:withMessages={1} -quiet {2}".
                          format(Config.FINDBUGS_PATH, report_path, jar_path))
+
     @staticmethod
     def run_jhawk(project_path: str, report_path: str, exclude_files: List[str]):
         """
@@ -54,8 +55,9 @@ class CommandUtils(object):
         :param report_path: 度量报告保存路径 [注意：末尾不需要.xml后缀名]
         :param exclude_files: 排除不扫描的文件路径列表
         """
-        CommandUtils.run("java -jar {0}/JHawkCommandLine.jar -x {1} -f .*\.java -r -s {2} -l pcm -a -p {0}/jhawk.properties -xf \"\\Q{3}\\E\"".
-                         format(Config.JHAWK_PATH, report_path, project_path, "\\E|\\Q".join(exclude_files)))
+        CommandUtils.run(
+            "java -jar {0}/JHawkCommandLine.jar -x {1} -f .*\.java -r -s {2} -l pcm -a -p {0}/jhawk.properties -xf \"\\Q{3}\\E\"".
+            format(Config.JHAWK_PATH, report_path, project_path, "\\E|\\Q".join(exclude_files)))
 
     @staticmethod
     def grep_enumeration(project_path: str) -> List[str]:

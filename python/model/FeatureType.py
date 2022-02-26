@@ -13,6 +13,9 @@ class _FeatureType(object):
         self.type_flag = type_flag
         self.select_flag = select_flag
 
+    def __str__(self):
+        return self.name
+
 
 class FeatureType(object):
     """
