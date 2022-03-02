@@ -112,6 +112,18 @@ class ReportData(object):
             df.to_csv(PathUtils.report_path(project_config.name + ".csv"), index=False)
 
     @staticmethod
+    def update_alarm(data_df: pd.DataFrame, project_name: str):
+        for index, group_df in data_df.groupby(["path", "version"]):
+            lines = group_df["location"].tolist()
+            java_path = PathUtils.project_path(project_name, index[1], index[0])
+            new_java_path = PathUtils.file_path(project_name, index[1], index[0])
+            new_location = CommandUtils.reformat_java(java_path, new_java_path, lines)
+            group_df["new_location"] = np.array(new_location)
+            for row in group_df.itertuples():
+                data_df.at[row.Index, "new_location"] = row.new_location
+        return data_df
+
+    @staticmethod
     def update_all_alarms(config: Dict[str, ProjectConfig]):
         """
         对警告涉及的 java 文件进行格式化，为了之后做差异块比较
@@ -124,12 +136,5 @@ class ReportData(object):
             PathUtils.rebuild_dir(PathUtils.file_path(project_config.name))
             LOG.info("Read project: " + project_config.name)
             # 以每个版本中的每个文件为单位进行处理
-            for index, group_df in df.groupby(["path", "version"]):
-                lines = group_df["location"].tolist()
-                java_path = PathUtils.project_path(project_config.name, index[1], index[0])
-                new_java_path = PathUtils.file_path(project_config.name, index[1], index[0])
-                new_location = CommandUtils.reformat_java(java_path, new_java_path, lines)
-                group_df["new_location"] = np.array(new_location)
-                for row in group_df.itertuples():
-                    df.at[row.Index, "new_location"] = row.new_location
+            df = ReportData.update_alarm(df, project_config.name)
             df.to_csv(PathUtils.report_path(project_config.name + ".csv"))

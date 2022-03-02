@@ -36,7 +36,7 @@ def check_common_features(df: pd.DataFrame, feature_list: List[str]):
     fig, ax = plt.subplots()
     ax.boxplot(true_data, positions=np.arange(len(feature_list)) + 0.9, widths=0.2)
     ax.boxplot(false_data, positions=np.arange(len(feature_list)) + 1.1, widths=0.2)
-    ax.set_xticks(ticks=np.arange(len(feature_list)) + 1, labels=[FeatureType.to_id(f) for f in feature_list])
+    ax.set_xticks(ticks=np.arange(len(feature_list)) + 1, labels=[FeatureType.get_label(f) for f in feature_list])
     fig.savefig(PathUtils.picture_path("feature", project_config.name + ".png"))
     # 单层决策树做阈值二分类
     threshold_list = []
@@ -75,8 +75,8 @@ def check_boolean_feature(df: pd.DataFrame, feature_list: List[str]):
 
 
 if __name__ == "__main__":
-    common_feature_list = [FeatureType.F19, FeatureType.F20, FeatureType.F21, FeatureType.F22, FeatureType.F23, FeatureType.F28, FeatureType.F29, FeatureType.F31, FeatureType.F33]
-    boolean_feature_list = list(filter(lambda s: FeatureType.to_id(s).split("_")[0] in ["F84", "F86", "F87", "F88"], FeatureType.to_list()))
+    common_feature_list = FeatureType.to_str_list(FeatureType.to_list(1))
+    boolean_feature_list = FeatureType.to_str_list(FeatureType.to_list(0))
     metric_df = pd.DataFrame(columns=common_feature_list + boolean_feature_list)
     threshold_df = pd.DataFrame(columns=common_feature_list + boolean_feature_list)
     for project_config in JsonUtils.read_projects(PathUtils.join_path("project.json")).values():

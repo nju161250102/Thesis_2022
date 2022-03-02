@@ -30,6 +30,29 @@ def reduce_alarms(df: pd.DataFrame) -> pd.DataFrame:
     return df.loc[choose_index_set].copy()
 
 
+def extract_one_version(alarm_df: pd.DataFrame, project_name: str, version: str) -> pd.DataFrame:
+    """
+    提取一个版本对应警告的特征
+    :param alarm_df: 警告DataFrame
+    :param project_name: 项目名称
+    :param version: 版本
+    :return: 特征DataFrame
+    """
+    # 特征
+    feature_df = pd.DataFrame(index=group_df.index)
+    # 分别提取特征
+    code_anl_df = CodeAnl(alarm_df, project_name, version).get_feature_df()
+    code_chr_df = CodeChr(alarm_df, project_name, version).get_feature_df()
+    warning_chr_df = WarningChr(alarm_df, project_name, version).get_feature_df()
+    warning_cmb_df = WarningCmb(alarm_df, project_name, version).get_feature_df()
+    # 合并不同类的特征DataFrame
+    feature_df = feature_df.join(code_anl_df)
+    feature_df = feature_df.join(code_chr_df)
+    feature_df = feature_df.join(warning_chr_df)
+    feature_df = feature_df.join(warning_cmb_df)
+    return feature_df
+
+
 if __name__ == "__main__":
     for project_name, project_config in JsonUtils.read_projects(PathUtils.join_path("project.json")).items():
         data_df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
@@ -42,18 +65,7 @@ if __name__ == "__main__":
         result_df = pd.DataFrame()
         # 分版本特征提取
         for version, group_df in data_df.groupby("version"):
-            feature_df = pd.DataFrame(index=group_df.index)
-            code_anl_df = CodeAnl(group_df, project_config.name, version).get_feature_df()
-            code_chr_df = CodeChr(group_df, project_config.name, version).get_feature_df()
-            warning_chr_df = WarningChr(group_df, project_config.name, version).get_feature_df()
-            warning_cmb_df = WarningCmb(group_df, project_config.name, version).get_feature_df()
-            # 合并不同类的特征DataFrame
-            feature_df = feature_df.join(code_anl_df)
-            feature_df = feature_df.join(code_chr_df)
-            feature_df = feature_df.join(warning_chr_df)
-            feature_df = feature_df.join(warning_cmb_df)
-            # 合并到项目整体DataFrame
-            result_df = result_df.append(feature_df)
+            result_df = result_df.append(extract_one_version(group_df, project_config.name, version))
         result_df["label"] = data_df["label"]
         result_df.dropna(inplace=True)
         result_df.to_csv(PathUtils.feature_path(project_config.name + ".csv"))
