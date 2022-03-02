@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="uk-flex-center" uk-grid>
+    <div class="uk-card uk-card-body uk-width-3-4">
+        <form class="uk-form-horizontal" id="form" method="post" action="/detail/{{alarm.id}}" uk-grid>
+            {% if info %}
+            <div class="uk-width-1-1">
+                <div class="uk-alert-danger">
+                    &nbsp;&nbsp;{{info}}
+                </div>
+            </div>
+            {% endif %}
+            <div class="uk-width-1-2">
+                <label class="uk-form-label" for="name-input">项目名称</label>
+                <div class="uk-form-controls uk-width-1-3">
+                    <input class="uk-input uk-form-blank" id="name-input" type="text" value="{{alarm.name}}"
+                           disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-2">
+                <label class="uk-form-label" for="version-input">项目版本</label>
+                <div class="uk-form-controls uk-width-1-3">
+                    <input class="uk-input" id="version-input" type="text" value="{{alarm.version}}" disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-2">
+                <label class="uk-form-label" for="class-input">类名</label>
+                <div class="uk-form-controls uk-width-1-3">
+                    <input class="uk-input" id="class-input" type="text" value="{{alarm.classname}}" disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-2">
+                <label class="uk-form-label" for="method-input">方法名</label>
+                <div class="uk-form-controls uk-width-1-3">
+                    <input class="uk-input" id="method-input" type="text" value="{{alarm.method}}" disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-2">
+                <label class="uk-form-label" for="category">警告分类</label>
+                <div class="uk-form-controls uk-width-1-3">
+                    <input class="uk-input" id="category" type="text" value="{{alarm.category}}" disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-2">
+                <label class="uk-form-label" for="type">警告类型</label>
+                <div class="uk-form-controls uk-width-1-3">
+                    <input class="uk-input" id="type" type="text" value="{{alarm.type}}" disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-1">
+                <label class="uk-form-label" for="signature">方法签名</label>
+                <div class="uk-form-controls uk-width-2-3">
+                    <input class="uk-input" id="signature" type="text" value="{{alarm.signature}}" disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-2">
+                <label class="uk-form-label" for="location">行号</label>
+                <div class="uk-form-controls uk-width-1-3">
+                    <input class="uk-input" id="location" type="text" value="{{alarm.location}}" disabled>
+                </div>
+            </div>
+            <div class="uk-width-1-1">
+                <div class="uk-alert-primary">
+                    &nbsp;&nbsp;文件路径：{{alarm.path}}
+                </div>
+                <pre style="overflow: hidden" data-line="2"><code style="overflow: hidden" class="language-java">{{code}}</code></pre>
+            </div>
+            <div class="uk-width-1-1">
+                <label class="uk-form-label" for="select" style="margin-top: 2px">判断结果</label>
+                <div class="uk-form-controls" id="select">
+                    <input class="uk-radio" id="select-no" type="radio" name="result" value="no" form="form">
+                    <label for="select-no" class="uk-margin-large-right">误报</label>
+                    <input class="uk-radio" id="select-yes" type="radio" name="result" value="yes" form="form">
+                    <label for="select-yes">正报</label>
+                </div>
+            </div>
+            <div class="uk-width-1-1">
+                <input class="uk-button uk-width-1-6 uk-button-primary" type="submit" value="确认提交">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

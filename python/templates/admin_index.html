@@ -14,14 +14,16 @@
             </tr>
             </thead>
             <tbody>
+            {% for p in project_list %}
             <tr>
-                <td>FuckThesis</td>
-                <td>0.0.0</td>
-                <td>1970-01-01 00:00:00</td>
-                <td>Just for Test</td>
-                <td>检测中</td>
-                <td>-</td>
+                <td>{{p.name}}</td>
+                <td>{{p.version}}</td>
+                <td>{{p.upload_time}}</td>
+                <td>{{p.description}}</td>
+                <td>{{p.state}}</td>
+                <td>{{p.alarm_num}}</td>
             </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>

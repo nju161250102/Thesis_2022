@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/css/uikit.min.css"/>
+    <link rel="stylesheet" href="/static/css/prism.css"/>
     <script src="/static/js/uikit.min.js"></script>
     <script src="/static/js/uikit-icons.min.js"></script>
+    <script src="/static/js/prism.js"></script>
     <title>漏洞扫描检测系统 - {{title}}</title>
 </head>
 <body>
@@ -30,6 +32,9 @@
                 <a href="#">当前用户：{{username}}</a>
                 <div class="uk-navbar-dropdown" style="padding: 10px; margin: 0; width: 150px">
                     <ul class="uk-nav uk-navbar-dropdown-nav">
+                        <li class="uk-active">
+                            <a href="/">修改密码</a>
+                        </li>
                         <li class="uk-active">
                             <a href="/logout">退出登录</a>
                         </li>

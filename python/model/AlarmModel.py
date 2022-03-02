@@ -1,3 +1,5 @@
+import time
+
 from peewee import AutoField, TextField, IntegerField
 
 from .BaseModel import BaseModel
@@ -14,7 +16,7 @@ class AlarmModel(BaseModel):
     location = IntegerField(null=True)
     method = TextField(null=True)
     signature = TextField(null=True)
-    create_time = TextField(null=True)
+    create_time = TextField(null=True, default=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
     class Meta:
         table_name = "alarm"
