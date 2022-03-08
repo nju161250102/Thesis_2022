@@ -14,7 +14,7 @@ class QueryBase(object):
         :param max_num: 每次采样的最大值
         """
         self.data_df = data_df
-        self.label_series = data_df["label"].copy()
+        # self.label_series = data_df["label"].copy()
         self.max_num = max_num
         self.name = name
 

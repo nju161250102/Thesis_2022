@@ -11,7 +11,7 @@ class AlarmService(object):
         return AlarmModel.select().where(AlarmModel.project_id == project_id).count()
 
     @staticmethod
-    def get_by_id(alarm_id: int) -> AlarmModel:
+    def get_by_id(alarm_id: str) -> AlarmModel:
         return AlarmModel.select().where(AlarmModel.id == alarm_id).dicts().get()
 
     @staticmethod
@@ -19,7 +19,7 @@ class AlarmService(object):
         return [alarm.id for alarm in AlarmModel.select().where(AlarmModel.project_id == project_id)]
 
     @staticmethod
-    def get_code(alarm_id: int) -> str:
+    def get_code(alarm_id: str) -> str:
         alarm = AlarmService.get_by_id(alarm_id)
         try:
             with open(PathUtils.file_path(alarm.name, alarm.version, alarm.path)) as f:
@@ -29,11 +29,10 @@ class AlarmService(object):
 
     @staticmethod
     def save(alarm: Alarm, project_id: int) -> int:
-        alarm_model = AlarmModel(category=alarm.category, type=alarm.type, rank=alarm.rank, path=alarm.path,
-                                 classname=alarm.class_name, method=alarm.method, signature=alarm.signature,
-                                 location=alarm.new_location, project_id=project_id)
-        alarm_model.save()
-        return alarm_model.id
+        AlarmModel.create(id=alarm.index, category=alarm.category, type=alarm.type, rank=alarm.rank, path=alarm.path,
+                          classname=alarm.class_name, method=alarm.method, signature=alarm.signature,
+                          location=alarm.new_location, project_id=project_id)
+        return alarm.index
 
 
 class AlarmServiceStub(object):

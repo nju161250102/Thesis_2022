@@ -12,7 +12,7 @@ class CommandUtils(object):
     """
 
     @staticmethod
-    def run(command: str, path=None, out=False) -> List[str]:
+    def run(command: str, path=None, out=True) -> List[str]:
         """
         切换到指定目录下并执行命令
         :param command: 命令

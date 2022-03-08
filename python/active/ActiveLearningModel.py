@@ -81,7 +81,6 @@ class ActiveLearningModel(object):
         LOG.info("Init:  " + self.init_sample.name)
         LOG.info("Model: " + self.learn_model.name)
         LOG.info("Query: " + self.query_strategy.name)
-        LOG.info("Size:  " + str(len(self.data_df[self.data_df["label"] == Alarm.TP])) + "/" + str(len(self.data_df)))
         # 如果是初次训练则使用初始化采样，否则选择已有的模型预测
         try:
             check_is_fitted(self.learn_model.model)
@@ -153,7 +152,7 @@ class ActiveLearningModel(object):
         config = self.config["init_sample"]
         if config["name"] == "kmeans":
             return KMeansInitSample(config["cluster_n"], config["sample_num"])
-        return RandomInitSample(config["sample_num"], config["stop_threshold"])
+        return RandomInitSample(config["sample_num"], config["stop_threshold"], self.query_func)
 
     def _build_stop_strategy(self):
         """

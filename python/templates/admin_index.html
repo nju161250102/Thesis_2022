@@ -20,8 +20,21 @@
                 <td>{{p.version}}</td>
                 <td>{{p.upload_time}}</td>
                 <td>{{p.description}}</td>
-                <td>{{p.state}}</td>
+
+                {% if p.state == 0 %}
+                <td>检测中</td>
+                {% elif p.state == 1 %}
+                <td>审核中</td>
+                {% elif p.state == 2 %}
+                <td>审核完成</td>
+                {% else %}
+                <td>未知</td>
+                {% endif %}
+                {% if p.state == 2 %}
                 <td>{{p.alarm_num}}</td>
+                {% else %}
+                <td>-</td>
+                {% endif %}
             </tr>
             {% endfor %}
             </tbody>

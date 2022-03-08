@@ -2,7 +2,7 @@
 {% block content %}
 <div class="uk-flex-center" uk-grid>
     <div class="uk-card uk-card-body uk-width-3-4">
-        <form class="uk-form-stacked" method="post" action="/upload">
+        <form class="uk-form-stacked" method="post" action="/upload" enctype ="multipart/form-data">
             <fieldset class="uk-fieldset">
                 <legend class="uk-legend uk-text-center">项目上传</legend>
                 <div class="uk-margin">
@@ -19,14 +19,14 @@
                 </div>
                 <div class="uk-margin">
                     <label class="uk-form-label" for="file-input">上传源代码压缩包</label>
-                    <div class="uk-form-custom uk-width-1-4">
+                    <div class="uk-form-custom uk-width-1-4" uk-form-custom="target: true">
                         <input id="file-input" name="zip" type="file" accept=".zip">
                         <input class="uk-input" type="text" placeholder="Select zip file" disabled>
                     </div>
                 </div>
                 <div class="uk-margin">
                     <label class="uk-form-label uk-width-1-6" for="jar-input">上传Jar包</label>
-                    <div class="uk-form-custom uk-width-1-4">
+                    <div class="uk-form-custom uk-width-1-4" uk-form-custom="target: true">
                         <input id="jar-input" name="jar" type="file" accept=".jar">
                         <input class="uk-input" type="text" placeholder="Select jar file" disabled>
                     </div>

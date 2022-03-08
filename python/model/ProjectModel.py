@@ -15,4 +15,4 @@ class ProjectModel(BaseModel):
     create_time = TextField(null=True, default=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
     class Meta:
-        table_name = "worker"
+        table_name = "project"

@@ -39,7 +39,7 @@ def extract_one_version(alarm_df: pd.DataFrame, project_name: str, version: str)
     :return: 特征DataFrame
     """
     # 特征
-    feature_df = pd.DataFrame(index=group_df.index)
+    feature_df = pd.DataFrame(index=alarm_df.index)
     # 分别提取特征
     code_anl_df = CodeAnl(alarm_df, project_name, version).get_feature_df()
     code_chr_df = CodeChr(alarm_df, project_name, version).get_feature_df()

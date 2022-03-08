@@ -19,6 +19,7 @@ if __name__ == "__main__":
       id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
       name TEXT DEFAULT NULL,
       version TEXT DEFAULT NULL,
+      state INTEGER NOT NULL,
       create_time TEXT DEFAULT NULL,
       description TEXT DEFAULT NULL);
     ''')
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     c.execute("DROP TABLE IF EXISTS alarm;")
     c.execute('''
     CREATE TABLE alarm (
-      id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+      id TEXT NOT NULL PRIMARY KEY,
       project_id INTEGER NOT NULL,
       category TEXT DEFAULT NULL,
       type TEXT DEFAULT NULL,
@@ -43,9 +44,10 @@ if __name__ == "__main__":
     c.execute('''
     CREATE TABLE label (
       id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      alarm_id INTEGER NOT NULL,
+      alarm_id TEXT NOT NULL,
       worker_id INTEGER NOT NULL,
       value INTEGER NOT NULL ,
+      label_time TEXT DEFAULT NULL,
       create_time TEXT DEFAULT NULL);
     ''')
 

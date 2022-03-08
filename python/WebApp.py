@@ -1,18 +1,27 @@
 import os
+from time import sleep
+
+import json
 import pandas as pd
 from copy import deepcopy
 from threading import Thread
 
 from flask import Flask, render_template, session, request, redirect
+from flask.logging import default_handler
+from Logger import LOG
 
+from active import ActiveLearningModel
 from data import ReportData
+from model import Alarm
 from service import WorkerService, ProjectService, AlarmService, LabelService
 from utils import CommandUtils, PathUtils
-from .ExtractFeature import extract_one_version
+from ExtractFeature import extract_one_version
 
 
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
+app.logger.removeHandler(default_handler)
+app.logger.addHandler(LOG.handlers[0])
 
 # 管理员界面标题栏
 admin_nav_list = [{
@@ -40,7 +49,7 @@ worker_nav_list = [{
 }]
 
 
-def merge_alarm(alarm_id: int) -> dict:
+def merge_alarm(alarm_id: str) -> dict:
     """
     合并警告的项目信息和审核标记
     :param alarm_id: 警告ID
@@ -61,7 +70,11 @@ def login_auth(func):
     """
     def inner(*args, **kwargs):
         if session.get("username") is None:
-            return redirect("/login")
+            session["id"] = -1
+            session["username"] = "admin"
+            session["userType"] = "admin"
+            return func(*args, **kwargs)
+            # return redirect("/login")
         else:
             return func(*args, **kwargs)
     return inner
@@ -69,27 +82,61 @@ def login_auth(func):
 
 def project_thread(name: str, version: str, project_id: int):
     # 解压文件
-    CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(name, version),
+    CommandUtils.run("unzip -o -q -d {0} {1}".format(PathUtils.project_path(name, version),
                                                   PathUtils.project_path(name, version + ".zip")))
     # 漏洞扫描
+    PathUtils.rebuild_dir(PathUtils.report_path(name), skip=True)
     CommandUtils.run_spotbugs(PathUtils.project_path(name, version + ".jar"),
                               PathUtils.report_path(name, version + ".xml"))
     # 读取警告
-    alarm_list = ReportData.read_report(name, version)
+    alarm_list = ReportData.read_report(name, version)[:20]
     alarm_df = pd.DataFrame([alarm.__dict__ for alarm in alarm_list])
     # 代码行变更
     alarm_df = ReportData.update_alarm(alarm_df, name)
-    # 这边遍历一下更新new_location
+    # 更新new_location
+    alarm_list = Alarm.from_dataframe(alarm_df)
     # 保存警告
     alarm_id_list = [AlarmService.save(alarm, project_id) for alarm in alarm_list]
     # 提取特征
     feature_df = extract_one_version(alarm_df, name, version)
     # 保存特征
+    # feature_df.to_csv(PathUtils.feature_path(name + ".csv"))
+    ProjectService.change_state(project_id, 1)
+    # 调用主动学习模型
+    model_config = {
+        "init_sample": {
+            "name": "random",
+            "sample_num": 5,
+            "stop_threshold": 1,
+            "cluster_n": 5
+        },
+        "learn_model": {
+            "name": "bagging"
+        },
+        "query_strategy": {
+            "name": "certain_query",
+            "max_num": 5
+        },
+        "stop_strategy": {
+            "name": "never"
+        }
+    }
+
+    def ask_label(index_set: set):
+        # 分配给工人标记
+        LabelService.add_labels(index_set)
+        # 每隔一段时间检查是否全部审核过
+        while not LabelService.check_all_labeled(index_set):
+            sleep(30)
+
+    active_learner = ActiveLearningModel(config=model_config, query_func=ask_label)
+    active_learner.run(feature_df, metric_flag=False)
+    ProjectService.change_state(project_id, 2)
 
 
 @app.route("/", methods=["GET", "POST"])
 def main_page():
-    # 判断是否登录
+    # 判断是否登录覆盖
     if "username" not in session:
         username = request.form.get("username")
         password = request.form.get("password")
@@ -144,17 +191,8 @@ def upload_page():
             jar_file.save(PathUtils.project_path(name, version + ".jar"))
             # 保存到数据库
             project_id = ProjectService.save(name=name, version=version, description=description)
-
-            def thread_func():
-                # 解压文件
-                CommandUtils.run("unzip -q -d {0} {1}".format(PathUtils.project_path(name, version),
-                                                              PathUtils.project_path(name, version + ".zip")))
-                # 漏洞扫描
-                CommandUtils.run_spotbugs(PathUtils.project_path(name, version + ".jar"),
-                                          PathUtils.report_path(name, version + ".xml"))
-
             # 启动线程
-            t = Thread(target=thread_func, name="Project-" + name)
+            t = Thread(target=project_thread, name="Project-" + name, args=(name, version, project_id))
             t.start()
             info = "项目上传成功"
         except Exception:

@@ -21,16 +21,10 @@ class ProjectService(object):
             project_list = ProjectModel.select()
         else:
             project_list = ProjectModel.select().where(ProjectModel.state == state)
-        project_list = project_list.order_by(-ProjectModel.create_time)
-
-        return [{
-            "name": p.name,
-            "version": p.version,
-            "upload_time": p.create_time,
-            "description": p.description,
-            "state": state_str(p.state),
-            "alarm_num": AlarmService.get_sum(p.id) if p.state == 2 else "-",
-        } for p in project_list]
+        project_list = project_list.order_by(-ProjectModel.create_time).dicts()
+        for i in range(len(project_list)):
+            project_list[i]["alarm_num"] = AlarmService.get_sum(project_list[i]["id"])
+        return project_list
 
     @staticmethod
     def get_by_id(project_id: int) -> dict:
@@ -45,7 +39,7 @@ class ProjectService(object):
 
     @staticmethod
     def save(**kwargs) -> int:
-        project = ProjectModel(kwargs)
+        project = ProjectModel(**kwargs)
         project.save()
         return project.id
 
@@ -56,6 +50,12 @@ class ProjectService(object):
             return ""
         else:
             return project_list.first().version
+
+    @staticmethod
+    def change_state(project_id: int, new_state: int):
+        project = ProjectModel.get_by_id(project_id)
+        project.state = new_state
+        project.save()
 
 
 class ProjectServiceStub(object):
@@ -86,3 +86,7 @@ class ProjectServiceStub(object):
     @staticmethod
     def get_by_name(project_name: str, version: str) -> dict:
         return ProjectServiceStub.get_by_id(-1)
+
+    @staticmethod
+    def change_state(project_id: int, new_state: int):
+        pass

@@ -1,12 +1,12 @@
 import time
 
-from peewee import AutoField, TextField, IntegerField
+from peewee import TextField, IntegerField
 
 from .BaseModel import BaseModel
 
 
 class AlarmModel(BaseModel):
-    id = AutoField()
+    id = TextField()
     project_id = IntegerField(null=True)
     category = TextField(null=True)
     type = TextField(null=True)
