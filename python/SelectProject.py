@@ -4,7 +4,6 @@
 """
 import pandas as pd
 
-from Config import Config
 from data import GitData, MavenData
 from utils import PathUtils
 

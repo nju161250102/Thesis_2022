@@ -1,4 +1,3 @@
-from .CommandUtils import CommandUtils
-from .DataUtils import DataUtils
-from .JsonUtils import JsonUtils
-from .PathUtils import PathUtils
+from . import CommandUtils
+from . import DataUtils
+from . import PathUtils

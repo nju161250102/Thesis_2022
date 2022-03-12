@@ -4,8 +4,8 @@ import time
 from typing import Dict, List
 
 import requests
-from requests.adapters import HTTPAdapter
 import wget
+from requests.adapters import HTTPAdapter
 
 from Config import Config
 from Logger import LOG
@@ -49,6 +49,7 @@ def search_versions(project_url: str) -> ProjectConfig:
             path = match.groups()[1]
             update_time = groups[0]
             file_size = groups[2]
+            # 时间段过滤
             if not ("2019-01-01" <= update_time[:10] <= "2020-12-31"):
                 continue
             if file_size == "-" and update_time != "-":
@@ -67,22 +68,18 @@ def search_versions(project_url: str) -> ProjectConfig:
                 if sources_jar not in html:
                     LOG.warn(sources_jar + " not found")
                     sources_jar = None
-                version = Version({
-                    "number": version_number,
-                    "updateTime": update_time,
-                    "sources": sources_jar,
-                    "target": target_jar
-                })
-                if version.updateTime is not None:
-                    versions.append(version)
+                if update_time and target_jar and sources_jar:
+                    versions.append(Version({
+                        "number": version_number,
+                        "updateTime": update_time,
+                        "sources": sources_jar,
+                        "target": target_jar
+                    }))
         time.sleep(0.5)
     # 按版本发布的日期排序
     versions.sort(key=lambda v: v.updateTime)
-    # 时间段过滤
-    select_versions = versions[:]
     # 将符合条件的版本号保存
-    select_versions = list(
-        filter(lambda v: v.sources is not None and v.target is not None, select_versions))
+    select_versions = [v.number for v in versions]
     return ProjectConfig({
         "name": project_name,
         "url": project_url,
@@ -126,7 +123,7 @@ def list_project_names(url: str) -> List[str]:
     列出Maven目录下的子目录，以末尾字符判断
     """
     result = []
-    req = s.get(url, timeout=15)
+    req = s.get(url, timeout=10)
     for match in re.finditer(r"<a(.*?)>(.*?)</a>", req.text):
         if match.groups()[1].endswith("/"):
             result.append(match.groups()[1][:-1])
