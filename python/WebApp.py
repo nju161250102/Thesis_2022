@@ -39,11 +39,11 @@ admin_nav_list = [{
 }]
 # 工人界面标题栏
 worker_nav_list = [{
-    "name": "标记任务",
+    "name": "审核任务",
     "active": False,
     "url": "/"
 }, {
-    "name": "标记历史",
+    "name": "审核历史",
     "active": False,
     "url": "/history"
 }]
@@ -60,6 +60,7 @@ def merge_alarm(alarm_id: str) -> dict:
     alarm["name"] = project["name"]
     alarm["version"] = project["version"]
     alarm["label"] = label["value"]
+    alarm["label_time"] = label["label_time"]
     return alarm
 
 
@@ -70,11 +71,11 @@ def login_auth(func):
     """
     def inner(*args, **kwargs):
         if session.get("username") is None:
-            session["id"] = -1
-            session["username"] = "admin"
-            session["userType"] = "admin"
-            return func(*args, **kwargs)
-            # return redirect("/login")
+            # session["id"] = -1
+            # session["username"] = "admin"
+            # session["userType"] = "admin"
+            # return func(*args, **kwargs)
+            return redirect("/login")
         else:
             return func(*args, **kwargs)
     return inner
@@ -153,12 +154,20 @@ def main_page():
             return render_template("login.html", info="用户名或密码错误")
     # 此时session中已有username字段，根据用户类型返回页面
     if session["userType"] == "admin":
+        # 根据状态值筛选
+        state_str = request.form.get("type", "all", type=str)
+        state_dict = {
+            "all": -1,
+            "scan": 0,
+            "check": 1,
+            "done": 2
+        }
         # 获取项目列表
-        project_list = ProjectService.get_list()
+        project_list = ProjectService.get_list(state_dict[state_str])
         index_nav_list = deepcopy(admin_nav_list)
         index_nav_list[0]["active"] = True
         return render_template("admin_index.html", title="首页", nav_list=index_nav_list, username=session["username"],
-                               project_list=project_list)
+                               project_list=project_list, state=state_str)
     else:
         alarm_id_list = LabelService.get_my_alarms(session["id"], False)
         alarm_list = [merge_alarm(alarm_id) for alarm_id in alarm_id_list]

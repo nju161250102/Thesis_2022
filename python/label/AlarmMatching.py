@@ -43,15 +43,18 @@ class AlarmMatching(object):
         line_range_b = [0]
         # 比较文件的差异并进行分块
         for line in difflib.unified_diff(file_content_a, file_content_b, n=0):
-            reg = re.match(r"@@ -(\d*),(\d*) \+(\d*),(\d*) @@", line)
-            if reg is not None:
+            if reg := re.match(r"@@ -(\d*),(\d*) \+(\d*),(\d*) @@", line):
                 line_range_a.extend([int(reg.group(1)), int(reg.group(1)) + int(reg.group(2))])
                 line_range_b.extend([int(reg.group(3)), int(reg.group(3)) + int(reg.group(4))])
-            else:
-                reg = re.match(r"@@ -(\d*) \+(\d*) @@", line)
-                if reg is not None:
-                    line_range_a.extend([int(reg.group(1)), int(reg.group(1)) + 1])
-                    line_range_b.extend([int(reg.group(2)), int(reg.group(2)) + 1])
+            elif reg := re.match(r"@@ -(\d*) \+(\d*) @@", line):
+                line_range_a.extend([int(reg.group(1)), int(reg.group(1)) + 1])
+                line_range_b.extend([int(reg.group(2)), int(reg.group(2)) + 1])
+            elif reg := re.match(r"@@ -(\d*),(\d*) \+(\d*) @@", line):
+                line_range_a.extend([int(reg.group(1)), int(reg.group(1)) + int(reg.group(2))])
+                line_range_b.extend([int(reg.group(3)), int(reg.group(3)) + 1])
+            elif reg := re.match(r"@@ -(\d*) \+(\d*),(\d*) @@", line):
+                line_range_a.extend([int(reg.group(1)), int(reg.group(1)) + 1])
+                line_range_b.extend([int(reg.group(2)), int(reg.group(2)) + int(reg.group(3))])
         line_range_a.append(len(file_content_a))
         line_range_b.append(len(file_content_b))
         # 判断是匹配块还是差异块

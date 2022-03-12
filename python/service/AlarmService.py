@@ -42,17 +42,20 @@ class AlarmServiceStub(object):
         return 0
 
     @staticmethod
-    def get_by_id(alarm_id: int):
+    def get_by_id(alarm_id: str):
         return {
             "id": 1,
             "project_id": 0,
-            "category": "CORRECTNESS",
-            "type": "NP_NULL_PARAM_DEREF",
-            "classname": "FuckThesis",
-            "method": "test",
-            "signature": "(IZIIIZZ)Lorg/apache/lucene/codecs/blocktree/BlockTreeTermsWriter$PendingBlock;",
+            "category": "MALICIOUS_CODE",
+            "type": "EI_EXPOSE_REP",
+            "classname": "StopwordAnalyzerBase",
+            "method": "getStopwordSet",
+            "signature": "()Lorg/apache/lucene/analysis/CharArraySet;",
             "location": 2,
-            "path": "/src/test/FuckThesis.java"
+            "rank": 18,
+            "priority": 2,
+            "path": "org.apache.lucene.analysis.StopwordAnalyzerBase",
+            "create_time": "2022-03-04 11:56:32"
         }
 
     @staticmethod
@@ -60,7 +63,7 @@ class AlarmServiceStub(object):
         return [1]
 
     @staticmethod
-    def get_code(alarm_id: int) -> str:
+    def get_code(alarm_id: str) -> str:
         return "public static void main() {\n    return;\n}"
 
     @staticmethod

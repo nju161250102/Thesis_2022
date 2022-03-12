@@ -67,9 +67,9 @@ class ProjectServiceStub(object):
     @staticmethod
     def get_by_id(project_id: int) -> dict:
         return {
-            "name": "FuckThesis",
-            "version": "0.0.0",
-            "upload_time": "1970-01-01 00:00:00",
+            "name": "lucene",
+            "version": "7.7.0",
+            "upload_time": "2022-03-05 18:32:47",
             "description": "Just for Test",
             "state": 0,
             "alarm_num": "-",

@@ -1,9 +1,9 @@
 """
 数据收集模块
 """
-from .GitData import GitData
-from .LocalGitData import LocalGitData
-from .JiraData import JiraData
+import data.GitData
+import data.MavenData
+import data.ReportData
 from .DataBuilder import DataBuilder
-from .ReportData import ReportData
-from .MavenData import MavenData
+from .JiraData import JiraData
+from .LocalGitData import LocalGitData

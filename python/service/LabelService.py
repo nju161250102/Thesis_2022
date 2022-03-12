@@ -50,15 +50,17 @@ class LabelService(object):
 class LabelServiceStub(object):
 
     @staticmethod
-    def get_my_alarms(worker_id: int, label_flag: bool) -> List[int]:
-        return [0]
+    def get_my_alarms(worker_id: int, label_flag: bool) -> List[str]:
+        return [""]
 
     @staticmethod
-    def get_by_alarm(alarm_id: int) -> dict:
+    def get_by_alarm(alarm_id: str) -> dict:
         return {
             "alarm_id": alarm_id,
             "worker_id": 1,
-            "value": 1
+            "value": 1,
+            "create_time": "2022-03-04 14:26:09",
+            "label_time": "2022-03-05 09:19:32"
         }
 
     @staticmethod

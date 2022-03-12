@@ -2,6 +2,39 @@
 {% block content %}
 <div class="uk-flex-center" uk-grid>
     <div class="uk-card uk-card-body uk-width-3-4">
+        <form class="uk-form-horizontal" method="post" action="/">
+            <div class="uk-margin">
+                <label class="uk-form-label" for="type-select">状态筛选</label>
+                <div class="uk-form-controls">
+                    <select class="uk-select uk-width-1-6" id="type-select" name="type">
+                        {% if state == "scan" %}
+                        <option value="scan" selected>检测中</option>
+                        {% else %}
+                        <option value="scan">检测中</option>
+                        {% endif %}
+
+                        {% if state == "check" %}
+                        <option value="check" selected>审核中</option>
+                        {% else %}
+                        <option value="check">审核中</option>
+                        {% endif %}
+
+                        {% if state == "done" %}
+                        <option value="done" selected>审核完成</option>
+                        {% else %}
+                        <option value="done">审核完成</option>
+                        {% endif %}
+
+                        {% if state == "all" %}
+                        <option value="all" selected>全部</option>
+                        {% else %}
+                        <option value="all">全部</option>
+                        {% endif %}
+                    </select>
+                <input class="uk-button uk-width-1-6 uk-button-primary uk-margin-large-left" type="submit" value="查看">
+                </div>
+            </div>
+        </form>
         <table class="uk-table uk-table-striped">
             <thead>
             <tr>
