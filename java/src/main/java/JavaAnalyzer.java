@@ -1,156 +1,156 @@
-import com.alibaba.fastjson.JSONObject;
+import com.github.javaparser.Range;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.*;
 import lombok.Data;
-import model.ClassInfo;
-import model.MethodInfo;
-import org.apache.commons.io.FilenameUtils;
+import model.Alarm;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
 public class JavaAnalyzer {
 
-    private Map<String, ClassInfo> classMap = new HashMap<>();
-    private Map<String, MethodInfo> methodMap = new HashMap<>();
+    // 标记方法和类的特征是否可用，处理过程是否出错
+    private boolean classAvailable = false;
+    private boolean methodAvailable = false;
+    private String classVisibility = "default";
+    private String methodVisibility = "default";
+    private String returnType;
+    private boolean isClassAbstract = false;
+    private boolean isClassFinal = false;
+    private boolean isClassInterface = false;
+    private boolean isClassEnum = false;
+    private boolean isMethodStatic = false;
+    private boolean isMethodFinal = false;
+    private boolean isMethodAbstract = false;
 
-    public JavaAnalyzer(String projectPath) {
+    public JavaAnalyzer(String projectPath, Alarm alarm) {
+        // 两个元素分别存放类和方法的节点
+        BodyDeclaration[] declarations = new BodyDeclaration[2];
+        CompilationUnit cu;
         try {
-            Files.walk(Paths.get(projectPath))
-                    .filter(p -> "java".equals(FilenameUtils.getExtension(p.toString())))
-                    .forEach(this::accept);
+            cu = StaticJavaParser.parse(Paths.get(projectPath, alarm.getVersion(), alarm.getPath()));
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
-    }
-
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, ClassInfo> entry : classMap.entrySet()) {
-            builder.append(entry.getKey())
-                    .append(System.lineSeparator())
-                    .append(JSONObject.toJSONString(entry.getValue()))
-                    .append(System.lineSeparator());
+        // 解析出真正的类名
+        String className = alarm.getClassName();
+        String[] arr;
+        if (className.contains("$")) {
+            arr = className.split("\\$");
+        } else {
+            arr = className.split("\\.");
         }
-        for (Map.Entry<String, MethodInfo> entry : methodMap.entrySet()) {
-            builder.append(entry.getKey())
-                    .append(System.lineSeparator())
-                    .append(JSONObject.toJSONString(entry.getValue()))
-                    .append(System.lineSeparator());
-        }
-        return builder.toString();
-    }
-
-    private void accept(Path p) {
-        try {
-            CompilationUnit cu = StaticJavaParser.parse(p);
-            // 处理方法和接口
-            cu.findAll(ClassOrInterfaceDeclaration.class)
-                    .forEach(d -> d.getFullyQualifiedName().ifPresent(className -> {
-                        ClassInfo info = handleClass(d);
-                        info.setInterface(d.isInterface());
-                        classMap.put(className, info);
-                    }));
-            // 处理枚举类
-            cu.findAll(EnumDeclaration.class)
-                    .forEach(d -> d.getFullyQualifiedName().ifPresent(className -> {
-                        ClassInfo info = handleClass(d);
-                        info.setEnum(true);
-                        classMap.put(className, info);
-                    }));
-            // 处理方法
-            cu.findAll(MethodDeclaration.class)
-                    .forEach(m -> {
-                        String className = findParentClass(m).getFullyQualifiedName().orElse("");
-                        String methodName = m.getNameAsString();
-                        MethodInfo info = handleMethod(m);
-                        info.setReturnType(m.getTypeAsString());
-                        methodMap.put(className + "." + methodName, info);
+        className = arr[arr.length - 1];
+        for (ClassOrInterfaceDeclaration declaration : cu.findAll(ClassOrInterfaceDeclaration.class)) {
+            if (declaration.getNameAsString().equals(className)) {
+                String methodName = alarm.getMethod();
+                Integer line = alarm.getLocation();
+                // 确定方法对应的节点，构造函数方法名为<init>
+                if ("<init>".equals(alarm.getMethod())) {
+                    for (ConstructorDeclaration constructor : declaration.findAll(ConstructorDeclaration.class)) {
+                        constructor.getRange().ifPresent(range -> {
+                            if (range.begin.line <= line && line <= range.end.line) {
+                                declarations[1] = constructor;
+                            }
+                        });
+                    }
+                } else {
+                    for (MethodDeclaration method : declaration.findAll(MethodDeclaration.class)) {
+                        if (method.getNameAsString().equals(methodName)) {
+                            method.getRange().ifPresent(range -> {
+                                if (range.begin.line <= line && line <= range.end.line) {
+                                    declarations[1] = method;
+                                }
+                            });
+                        }
+                    }
+                }
+                // 如果找到了方法，说明可用
+                if (declarations[1] != null) {
+                    declarations[0] = declaration;
+                    Node[] lineNode = {null};
+                    declarations[1].walk(Node.TreeTraversal.BREADTHFIRST, n -> {
+                        Range range = n.getRange().orElse(null);
+                        if (range != null && lineNode[0] == null && range.begin.line == line && range.end.line == line) {
+                            lineNode[0] = n;
+                        }
                     });
-            // 处理构造方法
-            cu.findAll(ConstructorDeclaration.class)
-                    .forEach(m -> {
-                        String className = findParentClass(m).getFullyQualifiedName().orElse("");
-                        methodMap.put(className + ".<init>", handleMethod(m));
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    /**
-     * 处理类信息
-     */
-    private <T extends TypeDeclaration<T>> ClassInfo handleClass(T declaration) {
-        ClassInfo info = new ClassInfo();
-        for (Modifier modifier : declaration.getModifiers()) {
-            switch (modifier.getKeyword()) {
-                case PRIVATE:
-                    info.setPrivate(true);
-                case PUBLIC:
-                    info.setPublic(true);
-                case FINAL:
-                    info.setFinal(true);
-                case ABSTRACT:
-                    info.setAbstract(true);
-                case PROTECTED:
-                    info.setProtected(true);
+                }
             }
         }
-        if (!(info.isPrivate() || info.isProtected() || info.isPublic())) {
-            info.setDefault(true);
+        // 处理类
+        if (declarations[0] != null) {
+            this.classAvailable = true;
+            if (declarations[0].isClassOrInterfaceDeclaration()) {
+                ClassOrInterfaceDeclaration classOrInterface = declarations[0].asClassOrInterfaceDeclaration();
+                handleClassModifiers(classOrInterface.getModifiers());
+                this.isClassInterface = classOrInterface.isInterface();
+            }
         }
-        return info;
+        // 处理方法
+        if (declarations[1] != null) {
+            this.methodAvailable = true;
+            if (declarations[1].isConstructorDeclaration()) {
+                ConstructorDeclaration constructor = declarations[1].asConstructorDeclaration();
+                handleMethodModifiers(constructor.getModifiers());
+            } else if (declarations[1].isMethodDeclaration()) {
+                MethodDeclaration method = declarations[1].asMethodDeclaration();
+                handleMethodModifiers(method.getModifiers());
+                this.returnType = method.getTypeAsString();
+            }
+        }
     }
 
-    /**
-     * 处理方法信息
-     */
-    private <T extends CallableDeclaration<T>> MethodInfo handleMethod(T declaration) {
-        MethodInfo info = new MethodInfo();
-        for (Modifier modifier : declaration.getModifiers()) {
+    private void handleMethodModifiers(Iterable<Modifier> modifiers) {
+        for (Modifier modifier : modifiers) {
             switch (modifier.getKeyword()) {
                 case PRIVATE:
-                    info.setPrivate(true);
+                    this.methodVisibility = "private";
+                    break;
                 case PUBLIC:
-                    info.setPublic(true);
+                    this.methodVisibility = "public";
+                    break;
                 case STATIC:
-                    info.setStatic(true);
+                    this.isMethodStatic = true;
+                    break;
                 case FINAL:
-                    info.setFinal(true);
+                    this.isMethodFinal = true;
+                    break;
                 case ABSTRACT:
-                    info.setAbstract(true);
+                    this.isMethodAbstract = true;
+                    break;
                 case PROTECTED:
-                    info.setProtected(true);
+                    this.methodVisibility = "protected";
+                    break;
             }
         }
-        if (!(info.isPrivate() || info.isProtected() || info.isPublic())) {
-            info.setDefault(true);
-        }
-        return info;
     }
 
-    /**
-     * 向上寻找最近的类声明父节点
-     * @param node 节点
-     * @return 节点属于的类节点
-     */
-    private <T extends TypeDeclaration<T>> T findParentClass(Node node) {
-        while (node != null) {
-            node = node.getParentNode().orElse(null);
-            if (node instanceof ClassOrInterfaceDeclaration || node instanceof EnumDeclaration) {
-                return (T) node;
+    private void handleClassModifiers(Iterable<Modifier> modifiers) {
+        for (Modifier modifier : modifiers) {
+            switch (modifier.getKeyword()) {
+                case PRIVATE:
+                    this.classVisibility = "private";
+                    break;
+                case PUBLIC:
+                    this.classVisibility = "public";
+                    break;
+                case FINAL:
+                    this.isClassFinal = true;
+                    break;
+                case ABSTRACT:
+                    this.isClassAbstract = true;
+                    break;
+                case PROTECTED:
+                    this.classVisibility = "protected";
+                    break;
             }
         }
-        return null;
     }
-
 }

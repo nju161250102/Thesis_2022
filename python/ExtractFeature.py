@@ -1,12 +1,15 @@
 """
 项目警告特征提取脚本
+如果特征文件已存在会覆盖
+暂时废弃：添加 reduce 参数减少重复数据 :see reduce_alarms
 """
 import sys
 import pandas as pd
 
 from feature import *
+from Logger import LOG
 from model import Alarm
-from utils import PathUtils, JsonUtils
+from utils import PathUtils, DataUtils
 
 
 def reduce_alarms(df: pd.DataFrame) -> pd.DataFrame:
@@ -38,23 +41,17 @@ def extract_one_version(alarm_df: pd.DataFrame, project_name: str, version: str)
     :param version: 版本
     :return: 特征DataFrame
     """
-    # 特征
-    feature_df = pd.DataFrame(index=alarm_df.index)
     # 分别提取特征
     code_anl_df = CodeAnl(alarm_df, project_name, version).get_feature_df()
     code_chr_df = CodeChr(alarm_df, project_name, version).get_feature_df()
     warning_chr_df = WarningChr(alarm_df, project_name, version).get_feature_df()
     warning_cmb_df = WarningCmb(alarm_df, project_name, version).get_feature_df()
     # 合并不同类的特征DataFrame
-    feature_df = feature_df.join(code_anl_df)
-    feature_df = feature_df.join(code_chr_df)
-    feature_df = feature_df.join(warning_chr_df)
-    feature_df = feature_df.join(warning_cmb_df)
-    return feature_df
+    return pd.concat([code_anl_df, code_chr_df, warning_chr_df, warning_cmb_df], axis=1)
 
 
 if __name__ == "__main__":
-    for project_name, project_config in JsonUtils.read_projects(PathUtils.join_path("project.json")).items():
+    for project_name, project_config in DataUtils.read_projects(PathUtils.join_path("project.json")).items():
         data_df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index")
         # 提取特征时就过滤掉未知的警告
         data_df = data_df[data_df["label"] != Alarm.UNKNOWN].copy()
@@ -65,7 +62,8 @@ if __name__ == "__main__":
         result_df = pd.DataFrame()
         # 分版本特征提取
         for version, group_df in data_df.groupby("version"):
-            result_df = result_df.append(extract_one_version(group_df, project_config.name, version))
+            result_df = pd.concat([result_df, extract_one_version(group_df, project_config.name, version)])
         result_df["label"] = data_df["label"]
         result_df.dropna(inplace=True)
+        LOG.info(project_name + "\t" + str(result_df.shape))
         result_df.to_csv(PathUtils.feature_path(project_config.name + ".csv"))

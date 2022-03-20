@@ -7,9 +7,7 @@ from .FeatureCategory import FeatureCategory
 
 
 class CodeAnl(FeatureCategory):
-    """
-    代码分析 - Code Analysis
-    """
+    """ 代码分析 - Code Analysis """
 
     def __init__(self, alarm_df: pd.DataFrame, project_name: str, version: str):
         super().__init__(alarm_df, project_name, version)
@@ -23,6 +21,7 @@ class CodeAnl(FeatureCategory):
                 return 0
             else:
                 return int(d[k])
+
         def func(row: pd.Series, code_anl: CodeAnl) -> pd.Series:
             class_name = row["class_name"].replace("$", ".")
             class_info = code_anl.info_dict.get(class_name)
@@ -37,7 +36,6 @@ class CodeAnl(FeatureCategory):
                 FeatureType.F86_final: bool_to_int(method_info, "final"),
                 FeatureType.F86_abstract: bool_to_int(method_info, "abstract"),
                 FeatureType.F86_protected: bool_to_int(method_info, "protected"),
-
                 FeatureType.F87_public: bool_to_int(class_info, "public"),
                 FeatureType.F87_default: bool_to_int(class_info, "default"),
                 FeatureType.F87_protected: bool_to_int(class_info, "protected"),

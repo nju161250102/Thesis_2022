@@ -1,3 +1,6 @@
+import com.alibaba.fastjson.JSONObject;
+import model.Alarm;
+
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -16,19 +19,19 @@ public class MainApp {
         switch (args[0]) {
             case "format":
                 List<Integer> lines = Arrays.asList(args)
-                        .subList(3, args.length)
+                        .subList(2, args.length)
                         .stream()
                         .map(Integer::parseInt)
                         .collect(Collectors.toList());
-                String output = JavaFormatter.formatFile(Paths.get(args[1]), Paths.get(args[2]), lines)
+                String output = JavaFormatter.formatFile(Paths.get(args[1]), lines)
                         .stream()
                         .map(String::valueOf)
                         .collect(Collectors.joining("\n"));
                 System.out.println(output);
                 return;
-            case "analyse":
-                JavaAnalyzer analyzer = new JavaAnalyzer(args[1]);
-                System.out.println(analyzer);
+            case "method":
+                JavaAnalyzer analyzer = new JavaAnalyzer(args[1], JSONObject.parseObject(args[2], Alarm.class));
+                System.out.println(JSONObject.toJSONString(analyzer));
                 return;
             default:
                 System.exit(1);

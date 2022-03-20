@@ -2,32 +2,29 @@ class WarningType(object):
     """
     SpotBugs警告模式与对应类型
     抓取自 https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html
+    使用以下JS代码更新type_dict
+    let s = "";
     for (let h of document.getElementsByTagName("h3")) {
         arr = /(\w+): (.+) \((\w+)\)/.exec(h.innerText);
         if (arr == null) continue
-        console.log('"' + arr[3] + '": "' + arr[1] + "\"");
+        s = s + ('"' + arr[3] + '": "' + arr[1] + '",\n');
     }
+    console.log(s);
     """
 
     @staticmethod
     def to_int(warning_type: str) -> int:
-        """
-        警告类型转化为数字
-        """
+        """ 警告类型转化为数字 """
         return WarningType.type_list.index(warning_type)
 
     @staticmethod
     def to_addr(warning_type: str) -> str:
-        """
-        警告类型转化为缩写
-        """
+        """ 警告类型转化为缩写 """
         return WarningType.type_dict.get(warning_type)
 
     @staticmethod
     def parse(type_num: int) -> str:
-        """
-        数字转化为警告类型
-        """
+        """ 数字转化为警告类型 """
         return WarningType.type_list[type_num]
 
     @staticmethod
@@ -281,6 +278,7 @@ class WarningType(object):
         "FB_UNEXPECTED_WARNING": "FB",
         "FB_MISSING_EXPECTED_WARNING": "FB",
         "EOS_BAD_END_OF_STREAM_CHECK": "EOS",
+        "SSD_DO_NOT_USE_INSTANCE_LOCK_ON_SHARED_STATIC_DATA": "SSD",
         "SKIPPED_CLASS_TOO_BIG": "SKIPPED",
         "UNKNOWN": "TEST",
         "TESTING": "TEST",
@@ -501,7 +499,7 @@ class WarningType(object):
         "TQ_EXPLICIT_UNKNOWN_SOURCE_VALUE_REACHES_NEVER_SINK": "TQ",
         "TQ_EXPLICIT_UNKNOWN_SOURCE_VALUE_REACHES_ALWAYS_SINK": "TQ",
         "NP_METHOD_RETURN_RELAXING_ANNOTATION": "NP",
-        "NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION": "NP"
+        "NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION": "NP",
     }
     type_list = list(type_dict.keys())
     kind_dict = {}
