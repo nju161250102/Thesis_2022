@@ -5,6 +5,7 @@ from model import AlarmModel, Alarm
 
 
 class AlarmService(object):
+    items_per_page = 15
 
     @staticmethod
     def get_sum(project_id: int) -> int:
@@ -15,8 +16,16 @@ class AlarmService(object):
         return AlarmModel.select().where(AlarmModel.id == alarm_id).dicts().get()
 
     @staticmethod
-    def get_by_project(project_id: int) -> List[int]:
-        return [alarm.id for alarm in AlarmModel.select().where(AlarmModel.project_id == project_id)]
+    def get_by_project(project_id: int, page: int) -> List[str]:
+        return [alarm.id for alarm in
+                AlarmModel
+                .select()
+                .where(AlarmModel.project_id == project_id)
+                .paginate(page, AlarmService.items_per_page)]
+
+    @staticmethod
+    def page_count_by_project(project_id: int) -> int:
+        return int(AlarmModel.select().where(AlarmModel.project_id == project_id).count() / AlarmService.items_per_page)
 
     @staticmethod
     def get_code(alarm_id: str) -> str:
@@ -59,8 +68,12 @@ class AlarmServiceStub(object):
         }
 
     @staticmethod
-    def get_by_project(project_id: int) -> List[int]:
-        return [1]
+    def get_by_project(project_id: int, page: int) -> List[str]:
+        return ["1"]
+
+    @staticmethod
+    def page_count_by_project(project_id: int) -> int:
+        return 200
 
     @staticmethod
     def get_code(alarm_id: str) -> str:

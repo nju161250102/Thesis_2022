@@ -1,3 +1,4 @@
+import argparse
 import traceback
 from typing import List
 
@@ -5,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import auc
 
+from Logger import LOG
 from active import ActiveLearningModel
 from baseline import *
 from model import ProjectConfig
@@ -113,40 +115,9 @@ def run_active_learning(config: ProjectConfig, model: ActiveLearningModel, cur_d
         return cur_feature_df.loc[tp_in_last_version, "label"].to_list() + model.rank_labels(), model.rank_labels(pre_feature_df)
 
 
-def one_project_experiment(config: ProjectConfig, result: list):
-    """
-    在一个项目上运行实验，实验过程中及时保存
-    :param config: 项目配置
-    :param result: 实验结果
-    """
-    # 主动学习模型默认配置
-    model_config = {
-        "init_sample": {
-            "name": "random",
-            "sample_num": 10,
-            "stop_threshold": 1,
-            "cluster_n": 5
-        },
-        "learn_model": {
-            "name": "bagging"
-        },
-        "query_strategy": {
-            "name": "certain_query",
-            "max_num": 5
-        },
-        "stop_strategy": {
-            "name": "never"
-        }
-    }
-    # 使用的所有主动学习模型列表
-    active_learning_models = []
-    # 生成主动学习模型
-    for model_name in ["bagging", "stacking"]:
-        model_config["learn_model"]["stacking"] = model_name
-        active_learning_models.append(ActiveLearningModel(config=model_config))
-    # 遍历版本训练，结果保存在result中
+def one_project_baseline(config: ProjectConfig, result: list, output_file: str):
     for version, pre_df, cur_df in DataUtils.iter_version_df(config):
-
+        #
         def update_baseline(result_dict: dict, data_type):
             if result_dict is None:
                 return
@@ -165,13 +136,23 @@ def one_project_experiment(config: ProjectConfig, result: list):
             update_baseline(baseline_test_result, "cur")
         except:
             traceback.print_exc()
+            continue
+        # 保存当前结果
+        pd.DataFrame(result).to_csv(PathUtils.join_path(output_file), index=False, encoding="utf-8")
 
-        for model in active_learning_models:
+
+def one_project_active(config: ProjectConfig, config_generator, result: list, output_file: str):
+    for al_config in config_generator():
+        model = ActiveLearningModel(config=al_config)
+        for version, pre_df, cur_df in DataUtils.iter_version_df(config):
+            if pre_df is None:
+                continue
+            LOG.info("{0} - {1}".format(config.name, version))
             try:
                 train_label_list, test_label_list = run_active_learning(config, model, cur_df, pre_df)
             except:
                 traceback.print_exc()
-                continue
+                return
 
             def update_active_learning(label_list: list, data_type: str):
                 if label_list is None:
@@ -181,19 +162,60 @@ def one_project_experiment(config: ProjectConfig, result: list):
                     "version": version,
                     "method": "AL",
                     "type": data_type,
-                    "learn_model": model_name
+                    "learn_model": model.config["learn_model"]["name"],
+                    "init_sample_num": model.config["init_sample"]["sample_num"],
+                    "query_strategy": model.config["query_strategy"]["name"],
                 }
                 info_dict.update(experiment_metric(label_list))
                 result.append(info_dict)
 
             update_active_learning(train_label_list, "pre")
             update_active_learning(test_label_list, "cur")
-        # 保存当前结果
-        pd.DataFrame(result).to_csv(PathUtils.join_path("result.csv"), index=False, encoding="utf-8")
-    return result
+            # 保存当前结果
+            pd.DataFrame(result).to_csv(PathUtils.join_path(output_file), index=False, encoding="utf-8")
 
 
 if __name__ == "__main__":
-    project_config = DataUtils.read_project_config("lucene-core")
+    parser = argparse.ArgumentParser(description="Run Experiment")
+    parser.add_argument("-p", "--projects", dest="project_list", action="extend", nargs="*", type=str,
+                        help="The project(s) to run experiments(default: run on all projects)")
+    parser.add_argument("-t", "--run-type", action="store", default="all", type=str,
+                        help="The type of experiments(default: both baseline and active)")
+    parser.add_argument("-a", "--active-models", action="store", default="methods", type=str,
+                        help="How to generate active learning models")
+    parser.add_argument("-o", "--output", action="store", default="result.csv", type=str,
+                        help="The output file name")
+    args = parser.parse_args()
+    # 主动学习模型默认配置
+    model_config = ActiveLearningModel.default_config
+    # 结果
     all_result = []
-    one_project_experiment(project_config, all_result)
+
+    def default_config_generator():
+        for model_name in ["stacking", "bagging"]:
+            model_config["learn_model"]["name"] = model_name
+            yield model_config
+
+    def test_config_generator():
+        for model_name in ["bagging", "stacking"]:
+            for sample_num in [20, 50, 100]:
+                for query_name in ["certain", "uncertain"]:
+                    model_config["learn_model"]["name"] = model_name
+                    model_config["init_sample"]["sample_num"] = sample_num
+                    model_config["query_strategy"]["name"] = query_name
+                    yield model_config
+
+    config_generator = default_config_generator
+    if args.active_models == "all":
+        config_generator = test_config_generator
+    # 运行实验
+    if len(args.project_list) > 0:
+        for project_name in args.project_list:
+            project_config = DataUtils.read_project_config(project_name)
+            if args.run_type == "all":
+                one_project_baseline(project_config, all_result, args.output)
+                one_project_active(project_config, config_generator, all_result, args.output)
+            elif args.run_type == "baseline":
+                one_project_baseline(project_config, all_result, args.output)
+            elif args.run_type == "active":
+                one_project_active(project_config, config_generator, all_result, args.output)

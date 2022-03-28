@@ -1,4 +1,5 @@
 import pandas as pd
+from copy import deepcopy
 from sklearn.metrics import *
 from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
@@ -13,6 +14,25 @@ from .DataHandler import DataHandler
 
 
 class ActiveLearningModel(object):
+    # 主动学习模型默认配置
+    default_config = {
+        "init_sample": {
+            "name": "random",
+            "sample_num": 10,
+            "stop_threshold": 1,
+            "cluster_n": 6
+        },
+        "learn_model": {
+            "name": "svm"
+        },
+        "query_strategy": {
+            "name": "uncertain",
+            "max_num": 20
+        },
+        "stop_strategy": {
+            "name": "never"
+        }
+    }
 
     def __init__(self, config=None, query_func=None):
         """
@@ -25,24 +45,7 @@ class ActiveLearningModel(object):
         # 数据预处理
         self.data_handler = DataHandler()
         # 组件默认配置
-        self.config = {
-            "init_sample": {
-                "name": "random",
-                "sample_num": 10,
-                "stop_threshold": 1,
-                "cluster_n": 6
-            },
-            "learn_model": {
-                "name": "svm"
-            },
-            "query_strategy": {
-                "name": "uncertain",
-                "max_num": 20
-            },
-            "stop_strategy": {
-                "name": "never"
-            }
-        }
+        self.config = deepcopy(ActiveLearningModel.default_config)
         # 更新组件配置
         if config is not None and isinstance(config, dict):
             for k, v in self.config.items():
@@ -62,6 +65,7 @@ class ActiveLearningModel(object):
         """
         运行主动学习
         :param data_df: 原始csv保存的数据集
+        :param metric_flag: 是否计算每一轮训练的度量
         """
         # 更新训练数据集
         self.data_df = data_df.copy()
@@ -81,16 +85,21 @@ class ActiveLearningModel(object):
         LOG.info("Init:  " + self.init_sample.name)
         LOG.info("Model: " + self.learn_model.name)
         LOG.info("Query: " + self.query_strategy.name)
+        LOG.info("Size:  " + str(self.data_df.shape))
         # 如果是初次训练则使用初始化采样，否则选择已有的模型预测
         try:
+            # check_is_fitted(self.learn_model.model, attributes=["estimators_", "estimator_"], all_or_any=any)
             check_is_fitted(self.learn_model.model)
             x_data, y_label, _ = self.data_handler.preprocess(self.data_df, True)
             prob_series = pd.Series(self.learn_model.predict_prob(x_data), self.data_df.index)
             prob_series.sort_values(inplace=True, ascending=True)
             labeled_index_set = set(prob_series.iloc[:self.config["init_sample"]["sample_num"]].index)
+
         except NotFittedError:
             # 初始化采样标记一部分数据
             labeled_index_set = set(self.init_sample.get_sample_index(self.data_df))
+
+        LOG.info(len(labeled_index_set))
         # 剩下的为未标记数据
         unlabeled_index_set = set(self.data_df.index.tolist()) - labeled_index_set
         # 查询标签
@@ -102,7 +111,7 @@ class ActiveLearningModel(object):
                 LOG.info("Stop strategy activate")
                 break
             # 获取训练集和标签
-            train_df = self.data_df.loc[labeled_index_set]
+            train_df = self.data_df.loc[list(labeled_index_set)]
             train_data, train_label, _ = self.data_handler.preprocess(train_df, True)
             # 模型训练
             self.learn_model.train(train_data, train_label)
@@ -118,10 +127,10 @@ class ActiveLearningModel(object):
             self._query_labels(set(label_index.to_list()))
             # 分别在已标记和未标记的数据集上评估模型效果
             if metric_flag:
-                unlabeled_y_true = self.data_df.loc[unlabeled_index_set]["label"].to_numpy()
-                unlabeled_y_pred = self.data_df.loc[unlabeled_index_set]["model_label"].to_numpy()
-                labeled_y_true = self.data_df.loc[labeled_index_set]["label"].to_numpy()
-                labeled_y_pred = self.data_df.loc[labeled_index_set]["model_label"].to_numpy()
+                unlabeled_y_true = self.data_df.loc[list(unlabeled_index_set)]["label"].to_numpy()
+                unlabeled_y_pred = self.data_df.loc[list(unlabeled_index_set)]["model_label"].to_numpy()
+                labeled_y_true = self.data_df.loc[list(labeled_index_set)]["label"].to_numpy()
+                labeled_y_pred = self.data_df.loc[list(labeled_index_set)]["model_label"].to_numpy()
                 d = {}
                 d.update(self._evaluate(unlabeled_y_true, unlabeled_y_pred, prefix="test_"))
                 d.update(self._evaluate(labeled_y_true, labeled_y_pred, prefix="train_"))
@@ -178,7 +187,7 @@ class ActiveLearningModel(object):
         设置查询策略
         """
         config = self.config["query_strategy"]
-        if config["name"] == "certain_query":
+        if config["name"] == "certain":
             return CertainlyQuery(self.data_df, config["max_num"])
         return UncertainlyQuery(self.data_df, config["max_num"])
 

@@ -2,13 +2,13 @@
 {% block content %}
 <div class="uk-flex-center" uk-grid>
     <div class="uk-card uk-card-body uk-width-3-4">
-        <form class="uk-form-stacked" method="post" action="/report">
+        <form class="uk-form-stacked" method="get" action="/report">
             <div class="uk-margin">
                 <label class="uk-form-label" for="project-select">项目名称/版本</label>
                 <div class="uk-form-controls uk-width-1-4">
                     <select class="uk-select" id="project-select" name="project">
                         {% for project in project_list %}
-                        <option value="{{project.id}}">{{project.name + "/" + project.version}}</option>
+                        <option value="{{ project.id }}">{{project.name + "/" + project.version}}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -21,8 +21,8 @@
         <table class="uk-table uk-table-striped">
             <thead>
             <tr>
-                <th>项目名称</th>
-                <th>项目版本</th>
+<!--                <th>项目名称</th>-->
+<!--                <th>项目版本</th>-->
                 <th>类名</th>
                 <th>方法名</th>
                 <th>代码行</th>
@@ -33,23 +33,71 @@
             <tbody>
             {% for alarm in alarm_list %}
             <tr>
-                <td>{{alarm.name}}</td>
-                <td>{{alarm.version}}</td>
+<!--                <td>{{alarm.name}}</td>-->
+<!--                <td>{{alarm.version}}</td>-->
                 <td>{{alarm.classname}}</td>
                 <td>{{alarm.method}}</td>
                 <td>{{alarm.location}}</td>
                 <td>{{alarm.path}}</td>
                 {% if alarm.label == 1 %}
-                    <td>正报</td>
+                <td>正报</td>
                 {% elif alarm.label == 0 %}
-                    <td>误报</td>
+                <td>误报</td>
                 {% else %}
-                    <td>未知</td>
+                <td>未知</td>
                 {% endif %}
             </tr>
             {% endfor %}
             </tbody>
         </table>
+        <ul class="uk-pagination uk-flex-right" uk-margin>
+            {% if page_config.is_pre %}
+            <li>
+                {% else %}
+            <li class="uk-disabled">
+                {% endif %}
+                <a href="{{'/report?page=' ~ (page_config.active - 1) ~ '&project=' ~ project_id}}">
+                    <span uk-pagination-previous></span>
+                </a>
+            </li>
+            <li><a href="{{'/report?page=1&project=' ~ project_id}}">1</a></li>
+
+            {% if page_config.is_pre_symbol %}
+            <li class="uk-disabled"><span>...</span></li>
+            {% endif %}
+
+            {% for i in range(page_config.middle_start, page_config.middle_end + 1) %}
+            {% if i == page_config.active %}
+            <li class="uk-active">
+                {% else %}
+            <li>
+                {% endif %}
+                <a href="{{'/report?page=' ~ i ~ '&project=' ~ project_id}}">
+                    <span>{{i}}</span>
+                </a>
+            </li>
+            {% endfor %}
+
+            {% if page_config.is_next_symbol %}
+            <li class="uk-disabled"><span>...</span></li>
+            {% endif %}
+
+            {% if page_config.sum > 1 %}
+            <li><a href="{{'/report?page=' ~ page_config.sum ~ '&project=' ~ project_id}}">
+                {{page_config.sum}}</a>
+            </li>
+            {% endif %}
+
+            {% if page_config.is_next %}
+            <li>
+                {% else %}
+            <li class="uk-disabled">
+                {% endif %}
+                <a href="{{'/report?page=' ~ (page_config.active + 1) ~ '&project=' ~ project_id}}">
+                    <span uk-pagination-next></span>
+                </a>
+            </li>
+        </ul>
         {% endif %}
     </div>
 </div>

@@ -1,7 +1,10 @@
-import pandas as pd
 import random
-from .InitSampleBase import InitSampleBase
+
+import pandas as pd
+
+from Logger import LOG
 from model import Alarm
+from .InitSampleBase import InitSampleBase
 
 
 class RandomInitSample(InitSampleBase):
@@ -22,14 +25,15 @@ class RandomInitSample(InitSampleBase):
 
     def get_sample_index(self, data_df: pd.DataFrame) -> pd.Index:
         TP_num = 0
-        return_sample = pd.Index([], dtype="int64")
-        all_index = data_df.index
-        while TP_num < self.stop_threshold:
+        return_sample = pd.Index([], dtype="object")
+        all_index = data_df.copy().index
+        while TP_num < self.stop_threshold and len(all_index) >= self.batch_n:
             new_sample = random.sample(all_index.to_list(), self.batch_n)
             all_index = all_index.difference(new_sample)
-            return_sample = return_sample.append(pd.Index(new_sample, dtype="int64"))
+            return_sample = return_sample.append(pd.Index(new_sample, dtype="object"))
             if self.query_func is None:
                 TP_num = data_df.loc[return_sample, "label"].sum() / Alarm.TP
             else:
                 self.query_func(new_sample)
+        LOG.info(len(return_sample))
         return return_sample

@@ -13,7 +13,7 @@ class WorkerService(object):
         """
         if username == "admin":
             return -1
-        worker = WorkerModel.get(WorkerModel.username == username)
+        worker = WorkerModel.get(WorkerModel.name == username)
         if worker is not None and worker.password == password:
             return worker.id
         return -2

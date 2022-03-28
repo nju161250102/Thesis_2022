@@ -36,6 +36,54 @@
             {% endfor %}
             </tbody>
         </table>
+        <ul class="uk-pagination uk-flex-right" uk-margin>
+            {% if page_config.is_pre %}
+            <li>
+                {% else %}
+            <li class="uk-disabled">
+                {% endif %}
+                <a href="{{'/history?page=' ~ (page_config.active - 1)}}">
+                    <span uk-pagination-previous></span>
+                </a>
+            </li>
+            <li><a href="/history?page=1">1</a></li>
+
+            {% if page_config.is_pre_symbol %}
+            <li class="uk-disabled"><span>...</span></li>
+            {% endif %}
+
+            {% for i in range(page_config.middle_start, page_config.middle_end + 1) %}
+            {% if i == page_config.active %}
+            <li class="uk-active">
+                {% else %}
+            <li>
+                {% endif %}
+                <a href="{{'/history?page=' ~ i}}">
+                    <span>{{i}}</span>
+                </a>
+            </li>
+            {% endfor %}
+
+            {% if page_config.is_next_symbol %}
+            <li class="uk-disabled"><span>...</span></li>
+            {% endif %}
+
+            {% if page_config.sum > 1 %}
+            <li><a href="{{'/history?page=' ~ page_config.sum}}">
+                {{page_config.sum}}</a>
+            </li>
+            {% endif %}
+
+            {% if page_config.is_next %}
+            <li>
+                {% else %}
+            <li class="uk-disabled">
+                {% endif %}
+                <a href="{{'/history?page=' ~ (page_config.active + 1)}}">
+                    <span uk-pagination-next></span>
+                </a>
+            </li>
+        </ul>
     </div>
 </div>
 {% endblock %}

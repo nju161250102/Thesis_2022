@@ -52,6 +52,6 @@ class DataHandler(object):
             # 去除已经处理过的列名
             all_columns = all_columns.difference(columns)
         # 最后将剩下的列合并到结果中
-        transform_result.append(data_df[all_columns].to_numpy())
+        transform_result.append(data_df[list(all_columns)].to_numpy())
         transform_columns.extend(all_columns)
         return np.concatenate(transform_result, axis=1), x_labels, np.array(transform_columns, dtype=object)

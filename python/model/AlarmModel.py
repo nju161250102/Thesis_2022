@@ -6,7 +6,7 @@ from .BaseModel import BaseModel
 
 
 class AlarmModel(BaseModel):
-    id = TextField()
+    id = TextField(primary_key=True)
     project_id = IntegerField(null=True)
     category = TextField(null=True)
     type = TextField(null=True)

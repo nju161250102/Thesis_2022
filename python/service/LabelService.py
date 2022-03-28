@@ -5,16 +5,24 @@ from model import WorkerModel, LabelModel
 
 
 class LabelService(object):
+    items_per_page = 15
 
     @staticmethod
-    def get_my_alarms(worker_id: int, label_flag: bool) -> List[str]:
-        """获取工人被分配的待标记警告列表"""
+    def _get_my_alarms(worker_id: int, label_flag: bool):
         if label_flag:
-            return [label.alarm_id for label in LabelModel.select()
-                .where((LabelModel.worker_id == worker_id) & (LabelModel.value != -1))]
+            return LabelModel.select().where((LabelModel.worker_id == worker_id) & (LabelModel.value != -1))
         else:
-            return [label.alarm_id for label in LabelModel.select()
-                .where((LabelModel.worker_id == worker_id) & (LabelModel.value == -1))]
+            return LabelModel.select().where((LabelModel.worker_id == worker_id) & (LabelModel.value == -1))
+
+    @staticmethod
+    def get_my_alarms(worker_id: int, label_flag: bool, page: int) -> List[str]:
+        """获取工人被分配的待标记警告列表"""
+        label_list = LabelService._get_my_alarms(worker_id, label_flag).paginate(page, LabelService.items_per_page)
+        return [label.alarm_id for label in label_list]
+
+    @staticmethod
+    def page_count_my_alarms(worker_id: int, label_flag: bool) -> int:
+        return int(LabelService._get_my_alarms(worker_id, label_flag).count() / LabelService.items_per_page)
 
     @staticmethod
     def get_by_alarm(alarm_id: str) -> dict:
@@ -50,8 +58,12 @@ class LabelService(object):
 class LabelServiceStub(object):
 
     @staticmethod
-    def get_my_alarms(worker_id: int, label_flag: bool) -> List[str]:
+    def get_my_alarms(worker_id: int, label_flag: bool, page: int) -> List[str]:
         return [""]
+
+    @staticmethod
+    def page_count_my_alarms(worker_id: int, label_flag: bool) -> int:
+        return 2
 
     @staticmethod
     def get_by_alarm(alarm_id: str) -> dict:

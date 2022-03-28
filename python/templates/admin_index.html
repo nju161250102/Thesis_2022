@@ -2,7 +2,7 @@
 {% block content %}
 <div class="uk-flex-center" uk-grid>
     <div class="uk-card uk-card-body uk-width-3-4">
-        <form class="uk-form-horizontal" method="post" action="/">
+        <form class="uk-form-horizontal" method="get" action="/">
             <div class="uk-margin">
                 <label class="uk-form-label" for="type-select">状态筛选</label>
                 <div class="uk-form-controls">
@@ -31,7 +31,8 @@
                         <option value="all">全部</option>
                         {% endif %}
                     </select>
-                <input class="uk-button uk-width-1-6 uk-button-primary uk-margin-large-left" type="submit" value="查看">
+                    <input class="uk-button uk-width-1-6 uk-button-primary uk-margin-large-left" type="submit"
+                           value="查看">
                 </div>
             </div>
         </form>
@@ -51,7 +52,7 @@
             <tr>
                 <td>{{p.name}}</td>
                 <td>{{p.version}}</td>
-                <td>{{p.upload_time}}</td>
+                <td>{{p.create_time}}</td>
                 <td>{{p.description}}</td>
 
                 {% if p.state == 0 %}
@@ -72,6 +73,54 @@
             {% endfor %}
             </tbody>
         </table>
+        <ul class="uk-pagination uk-flex-right" uk-margin>
+            {% if page_config.is_pre %}
+            <li>
+                {% else %}
+            <li class="uk-disabled">
+                {% endif %}
+                <a href="{{'/?page=' ~ (page_config.active - 1) ~ '&type=' ~ state}}">
+                    <span uk-pagination-previous></span>
+                </a>
+            </li>
+            <li><a href="{{'/?page=1&type=' ~ state}}">1</a></li>
+
+            {% if page_config.is_pre_symbol %}
+            <li class="uk-disabled"><span>...</span></li>
+            {% endif %}
+
+            {% for i in range(page_config.middle_start, page_config.middle_end + 1) %}
+            {% if i == page_config.active %}
+            <li class="uk-active">
+                {% else %}
+            <li>
+                {% endif %}
+                <a href="{{'/?page=' ~ i ~ '&type=' ~ state}}">
+                    <span>{{i}}</span>
+                </a>
+            </li>
+            {% endfor %}
+
+            {% if page_config.is_next_symbol %}
+            <li class="uk-disabled"><span>...</span></li>
+            {% endif %}
+
+            {% if page_config.sum > 1 %}
+            <li><a href="{{'/?page=' ~ page_config.sum ~ '&type=' ~ state}}">
+                {{page_config.sum}}</a>
+            </li>
+            {% endif %}
+
+            {% if page_config.is_next %}
+            <li>
+                {% else %}
+            <li class="uk-disabled">
+                {% endif %}
+                <a href="{{'/?page=' ~ (page_config.active + 1) ~ '&type=' ~ state}}">
+                    <span uk-pagination-next></span>
+                </a>
+            </li>
+        </ul>
     </div>
 </div>
 {% endblock %}

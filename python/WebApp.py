@@ -1,7 +1,6 @@
 import os
 from time import sleep
 
-import json
 import pandas as pd
 from copy import deepcopy
 from threading import Thread
@@ -153,28 +152,31 @@ def main_page():
         else:
             return render_template("login.html", info="用户名或密码错误")
     # 此时session中已有username字段，根据用户类型返回页面
+    page = request.args.get("page", 1, type=int)
     if session["userType"] == "admin":
-        # 根据状态值筛选
-        state_str = request.form.get("type", "all", type=str)
         state_dict = {
             "all": -1,
             "scan": 0,
             "check": 1,
             "done": 2
         }
+        # 根据状态值筛选
+        state_str = request.args.get("type", "all", type=str)
+        page_sum = ProjectService.page_count(state_dict[state_str])
         # 获取项目列表
-        project_list = ProjectService.get_list(state_dict[state_str])
+        project_list = ProjectService.get_list(state_dict[state_str], page)
         index_nav_list = deepcopy(admin_nav_list)
         index_nav_list[0]["active"] = True
         return render_template("admin_index.html", title="首页", nav_list=index_nav_list, username=session["username"],
-                               project_list=project_list, state=state_str)
+                               project_list=project_list, state=state_str, page_config=get_page_config(page, page_sum))
     else:
-        alarm_id_list = LabelService.get_my_alarms(session["id"], False)
+        page_sum = LabelService.page_count_my_alarms(session["id"], False)
+        alarm_id_list = LabelService.get_my_alarms(session["id"], False, page)
         alarm_list = [merge_alarm(alarm_id) for alarm_id in alarm_id_list]
         index_nav_list = deepcopy(worker_nav_list)
         index_nav_list[0]["active"] = True
         return render_template("worker_index.html", title="首页", nav_list=index_nav_list, username=session["username"],
-                               alarm_list=alarm_list)
+                               alarm_list=alarm_list, page_config=get_page_config(page, page_sum))
 
 
 @app.route("/upload", methods=["GET", "POST"], endpoint="upload")
@@ -213,20 +215,25 @@ def upload_page():
                            info=info)
 
 
-@app.route("/report", methods=["GET", "POST"], endpoint="report")
+@app.route("/report", methods=["GET"], endpoint="report")
 @login_auth
 def report_page():
     # 获得审核完毕的项目列表
     project_list = ProjectService.get_list(state=2)
     alarm_list = None
-    if request.method == "POST":
+    page_config = None
+    project_id = request.args.get("project", None)
+    if project_id:
         # 获取项目下的警告列表
-        alarm_id_list = AlarmService.get_by_project(request.form.get("project"))
+        page = request.args.get("page", 1, type=int)
+        page_sum = AlarmService.page_count_by_project(project_id)
+        page_config = get_page_config(page, page_sum)
+        alarm_id_list = AlarmService.get_by_project(project_id, page)
         alarm_list = [merge_alarm(alarm_id) for alarm_id in alarm_id_list]
     report_nav_list = deepcopy(admin_nav_list)
     report_nav_list[2]["active"] = True
     return render_template("admin_report.html", title="查看报告", nav_list=report_nav_list, username=session["username"],
-                           project_list=project_list, alarm_list=alarm_list)
+                           project_list=project_list, alarm_list=alarm_list, page_config=page_config, project_id=project_id)
 
 
 @app.route("/detail/<int:alarm_id>", methods=["GET", "POST"], endpoint="detail")
@@ -246,15 +253,17 @@ def detail_page(alarm_id):
                            alarm=alarm, code=code, info=info)
 
 
-@login_auth
 @app.route("/history", methods=["GET"], endpoint="history")
+@login_auth
 def history_page():
+    page = request.args.get("page", 1, type=int)
+    page_sum = LabelService.page_count_my_alarms(session["id"], True)
+    alarm_id_list = LabelService.get_my_alarms(session["id"], True, page)
+    alarm_list = [merge_alarm(alarm_id) for alarm_id in alarm_id_list]
     history_nav_list = deepcopy(worker_nav_list)
     history_nav_list[1]["active"] = True
-    alarm_id_list = LabelService.get_my_alarms(session["id"], True)
-    alarm_list = [merge_alarm(alarm_id) for alarm_id in alarm_id_list]
     return render_template("worker_history.html", title="标记历史", nav_list=history_nav_list, username=session["username"],
-                           alarm_list=alarm_list)
+                           alarm_list=alarm_list, page_config=get_page_config(page, page_sum))
 
 
 @app.route("/login")
@@ -267,6 +276,44 @@ def logout_page():
     session.pop("username", None)
     session.pop("userType", None)
     return redirect("/login")
+
+
+def get_page_config(page: int, page_sum: int, allow_show: int = 11):
+    if page_sum <= allow_show:
+        is_pre_symbol = False
+        is_next_symbol = False
+
+        middle_start = 2
+        middle_end = page_sum - 1
+    else:
+        is_pre_symbol = (page > int(allow_show / 2) + 1)
+        is_next_symbol = ((page_sum - page) > int(allow_show / 2) + 1)
+        if not is_next_symbol:
+            middle_start = page_sum - allow_show + 2
+        elif not is_pre_symbol:
+            middle_start = 2
+        else:
+            middle_start = page - int(allow_show / 2) + 2
+        # middle_start = page - int(allow_show / 2) + 1 if is_pre_symbol else 2
+        if not is_pre_symbol:
+            middle_end = allow_show - 2
+        elif not is_next_symbol:
+            middle_end = page_sum - 1
+        else:
+            middle_end = page + int(allow_show / 2) - 2
+        # middle_end = page + int(allow_show / 2) - 1 if is_next_symbol else page_sum - 1
+    return {
+        "active": page,
+        "sum": page_sum,
+        # 上一页和下一页是否可用
+        "is_pre": page > 1,
+        "is_next": page < page_sum,
+        # 前部和后部的省略号是否显示
+        "is_pre_symbol": is_pre_symbol,
+        "is_next_symbol": is_next_symbol,
+        "middle_start": middle_start,
+        "middle_end": middle_end
+    }
 
 
 if __name__ == "__main__":

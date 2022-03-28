@@ -10,7 +10,7 @@ from .MyEncoder import MyEncoder
 
 def iter_report_df():
     for project_name, project_config in read_projects(PathUtils.join_path("project.json")).items():
-        yield _read_report_df(project_config)
+        yield read_report_df(project_config)
 
 
 def iter_version_df(project_config: ProjectConfig):
@@ -19,7 +19,7 @@ def iter_version_df(project_config: ProjectConfig):
     :param project_config: 项目配置
     :return 版本名称, 之前的所有版本数据, 当前版本的数据
     """
-    report_df = _read_report_df(project_config)
+    report_df = read_report_df(project_config)
     for i in range(0, len(project_config.select) - 1):
         # 如果是第一个版本，则只存在测试集
         yield (project_config.select[i],
@@ -52,7 +52,7 @@ def save_projects(config: Dict[str, ProjectConfig], json_file: str):
         f.write(json.dumps(config, indent=4, separators=(',', ':'), cls=MyEncoder))
 
 
-def _read_report_df(project_config: ProjectConfig):
+def read_report_df(project_config: ProjectConfig):
     report_df = pd.read_csv(PathUtils.report_path(project_config.name + ".csv"), index_col="index", dtype={"next": object})
     version_type = pd.CategoricalDtype(project_config.select, ordered=True)
     report_df["version"] = report_df["version"].astype(version_type)
