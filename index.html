@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>基于主动学习的警告排序优化</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\u9879\u76ee\u4ecb\u7ecd";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> 基于主动学习的警告排序优化
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href=".">项目介绍</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">配置指南</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="config/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83/">运行环境</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="config/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">配置文件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="config/%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/">数据目录</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">运行指南</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="run/%E9%A1%B9%E7%9B%AE%E9%80%89%E6%8B%A9/">项目选择</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="run/%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/">项目下载与警告扫描</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="run/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/">特征提取</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="run/%E8%AD%A6%E5%91%8A%E6%A0%87%E8%AE%B0/">警告正误报标记</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="run/%E5%AE%9E%E9%AA%8C%E8%BF%90%E8%A1%8C/">实验运行</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="run/%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C/">项目运行</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">开发指南</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/%E9%80%9A%E7%94%A8%E9%83%A8%E5%88%86/">通用部分</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/%E5%AE%9E%E9%AA%8C%E9%83%A8%E5%88%86/">实验部分</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/%E7%B3%BB%E7%BB%9F%E9%83%A8%E5%88%86/">系统部分</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">基于主动学习的警告排序优化</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>项目介绍</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">基于主动学习的警告排序优化实验/系统</h1>
+<p>本项目完成了以下工作：</p>
+<ul>
+<li>基于Git仓库和Maven仓库的实验项目选择</li>
+<li>自动化项目代码下载与静态分析工具扫描</li>
+<li>结合源代码的警告特征提取</li>
+<li>警告正误报标记</li>
+<li>基于主动学习的警告排序优化实验与效果评估</li>
+<li>实现了五种Baseline对比实验</li>
+<li>基于实验流程的演示系统与演示数据准备</li>
+</ul>
+<h2 id="_2">配置指南</h2>
+<p>在运行实验或系统前先按以下步骤进行配置：</p>
+<ol>
+<li><a href="config/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83/">检查运行环境</a></li>
+<li><a href="config/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">设置配置文件</a></li>
+<li><a href="config/%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/">创建数据目录</a></li>
+</ol>
+<h2 id="_3">运行指南</h2>
+<p>目录下各脚本的功能如下：</p>
+<ul>
+<li><a href="run/%E9%A1%B9%E7%9B%AE%E9%80%89%E6%8B%A9/"><code>SelectProject.py</code> - 项目选择</a></li>
+<li><a href="run/%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/"><code>PrepareProject.py</code> - 项目下载与警告扫描</a></li>
+<li><a href="run/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/"><code>ExtractFreature.py</code> - 警告特征提取</a></li>
+<li><a href="run/%E8%AD%A6%E5%91%8A%E6%A0%87%E8%AE%B0/"><code>LabelAlarms.py</code> - 警告正误报标记</a></li>
+<li><a href="run/%E5%AE%9E%E9%AA%8C%E8%BF%90%E8%A1%8C/"><code>BaseLine.py</code> - 实验运行</a></li>
+<li><a href="run/%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C/"><code>CreateDB.py</code>和<code>WebApp.py</code> - 创建数据库与系统运行</a></li>
+</ul>
+<h2 id="_4">开发指南</h2>
+<p>阅读项目代码前先了解每个Package的职责分配，以及当前类所对应的功能。</p>
+<ul>
+<li><a href="dev/%E9%80%9A%E7%94%A8%E9%83%A8%E5%88%86/">通用部分</a></li>
+<li><a href="dev/%E5%AE%9E%E9%AA%8C%E9%83%A8%E5%88%86/">实验部分</a></li>
+<li><a href="dev/%E7%B3%BB%E7%BB%9F%E9%83%A8%E5%88%86/">系统部分</a></li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="config/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83/" class="btn btn-neutral float-right" title="运行环境">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+      <span><a href="config/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme_extra.js" defer></script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.3.0
+Build Date UTC : 2022-04-01 10:34:06.743343+00:00
+-->

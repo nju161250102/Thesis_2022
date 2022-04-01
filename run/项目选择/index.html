@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>项目选择 - 基于主动学习的警告排序优化</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="../../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\u9879\u76ee\u9009\u62e9";
+        var mkdocs_page_input_path = "run/\u9879\u76ee\u9009\u62e9.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 基于主动学习的警告排序优化
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">项目介绍</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">配置指南</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../config/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83/">运行环境</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../config/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">配置文件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../config/%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/">数据目录</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">运行指南</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">项目选择</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/">项目下载与警告扫描</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/">特征提取</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E8%AD%A6%E5%91%8A%E6%A0%87%E8%AE%B0/">警告正误报标记</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E5%AE%9E%E9%AA%8C%E8%BF%90%E8%A1%8C/">实验运行</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C/">项目运行</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">开发指南</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev/%E9%80%9A%E7%94%A8%E9%83%A8%E5%88%86/">通用部分</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev/%E5%AE%9E%E9%AA%8C%E9%83%A8%E5%88%86/">实验部分</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev/%E7%B3%BB%E7%BB%9F%E9%83%A8%E5%88%86/">系统部分</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">基于主动学习的警告排序优化</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+          <li>运行指南 &raquo;</li><li>项目选择</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">项目选择</h1>
+
+
+  <div class="doc doc-object doc-module">
+
+
+
+<h2 id="SelectProject" class="doc doc-heading">
+        <code>SelectProject</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+      <p>实验项目筛选脚本</p>
+<p>直接运行，筛选结果保存在数据目录下的<code>project.csv</code>和<code>maven.csv</code>中。</p>
+<ul>
+<li><code>project.csv</code>: 项目名、项目地址、Star数、创建时间、更新时间</li>
+<li><code>maven.csv</code>: 项目名、子项目名、版本总数、实验选择范围内的版本数目</li>
+</ul>
+<p>Maven仓库中各项目下有大量子项目，逐个筛选耗费时间，因此除原项目名外，
+以特定后缀查找候选子项目，包括<code>-common</code>和<code>-core</code>。</p>
+
+
+    </div>
+
+  </div>
+
+<p>实验选择版本的条件参见：</p>
+
+
+  <div class="doc doc-object doc-module">
+
+
+
+<h2 id="data.MavenData" class="doc doc-heading">
+        <code>data.MavenData</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+      <p>对 Maven 仓库的相关操作 </p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 id="data.MavenData.search_versions" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">search_versions</span><span class="p">(</span><span class="n">project_url</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>搜索仓库路径下各版本的信息，过滤条件：</p>
+<ul>
+<li>存在源码Jar包和编译后的Jar包</li>
+<li>上传时间范围在2019-01-01到2020-12-31之间</li>
+</ul>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li><p><strong>project_url</strong> (<code>str</code>) – 必须以 / 结尾</p></li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+    <th class="field-name">Returns:</th>
+    <td class="field-body">
+        <ul class="first simple">
+          <li><p><code>ProjectConfig</code> – 项目对应的配置数据</p></li>
+        </ul>
+    </td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../config/%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/" class="btn btn-neutral float-left" title="数据目录"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/" class="btn btn-neutral float-right" title="项目下载与警告扫描">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../config/%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>特征提取 - 基于主动学习的警告排序优化</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="../../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\u7279\u5f81\u63d0\u53d6";
+        var mkdocs_page_input_path = "run/\u7279\u5f81\u63d0\u53d6.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 基于主动学习的警告排序优化
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">项目介绍</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">配置指南</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../config/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83/">运行环境</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../config/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">配置文件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../config/%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/">数据目录</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">运行指南</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../%E9%A1%B9%E7%9B%AE%E9%80%89%E6%8B%A9/">项目选择</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/">项目下载与警告扫描</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">特征提取</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E8%AD%A6%E5%91%8A%E6%A0%87%E8%AE%B0/">警告正误报标记</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E5%AE%9E%E9%AA%8C%E8%BF%90%E8%A1%8C/">实验运行</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C/">项目运行</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">开发指南</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev/%E9%80%9A%E7%94%A8%E9%83%A8%E5%88%86/">通用部分</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev/%E5%AE%9E%E9%AA%8C%E9%83%A8%E5%88%86/">实验部分</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev/%E7%B3%BB%E7%BB%9F%E9%83%A8%E5%88%86/">系统部分</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">基于主动学习的警告排序优化</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+          <li>运行指南 &raquo;</li><li>特征提取</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">特征提取</h1>
+
+
+  <div class="doc doc-object doc-module">
+
+
+
+<h2 id="ExtractFeature" class="doc doc-heading">
+        <code>ExtractFeature</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+      <p>项目警告特征提取脚本</p>
+<p>生成的特征文件保存在数据目录的<code>feature</code>文件夹下，以项目名作为文件名，如果特征文件已存在会覆盖。</p>
+<p>已废弃：添加 reduce 参数减少重复数据</p>
+
+
+    </div>
+
+  </div>
+
+<h2 id="_2">所有特征</h2>
+<p>特征列表参见以下代码：</p>
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="model.FeatureType.FeatureType" class="doc doc-heading">
+        <code>
+model.FeatureType.FeatureType        </code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+      <p>保存代码中使用的所有特征类型，变量名以F开头。</p>
+<p>特征编号参考论文：Is there a golden feature set for static warning identification?
+注意，原论文中的文件级别均被替换为类级别。</p>
+<p><strong> Code Characteristic </strong></p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>特征名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F19</td>
+<td>code_method_statement</td>
+<td>方法中不含有注释的语句数目</td>
+</tr>
+<tr>
+<td>F20</td>
+<td>code_class_statement</td>
+<td>类中不含有注释的语句数目</td>
+</tr>
+<tr>
+<td>F21</td>
+<td>code_package_statement</td>
+<td>包中不含有注释的语句数目</td>
+</tr>
+<tr>
+<td>F22</td>
+<td>code_class_comment</td>
+<td>类中的注释行数目</td>
+</tr>
+<tr>
+<td>F23</td>
+<td>code_class_comment_ratio</td>
+<td>类中注释行长度与代码行长度的比值</td>
+</tr>
+<tr>
+<td>F28</td>
+<td>code_class_method</td>
+<td>类中包含的方法数目</td>
+</tr>
+<tr>
+<td>F29</td>
+<td>code_package_method</td>
+<td>包中包含的方法数目</td>
+</tr>
+<tr>
+<td>F31</td>
+<td>code_package_class</td>
+<td>包中包含的类的数目</td>
+</tr>
+<tr>
+<td>F32</td>
+<td>code_package_class</td>
+<td>警告行的缩进空格数目</td>
+</tr>
+<tr>
+<td>F33</td>
+<td>code_package_class</td>
+<td>方法内代码的圈复杂度</td>
+</tr>
+</tbody>
+</table>
+<p><strong> Code Analysis </strong></p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>特征名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>F84</strong></td>
+<td>method_visibility_*</td>
+<td>方法中不含有注释的语句数目</td>
+</tr>
+<tr>
+<td>F85</td>
+<td>return_type</td>
+<td>类中不含有注释的语句数目</td>
+</tr>
+<tr>
+<td><strong>F86</strong></td>
+<td>method_*</td>
+<td>包中不含有注释的语句数目</td>
+</tr>
+<tr>
+<td><strong>F87</strong></td>
+<td>class_visibility_*</td>
+<td>类中的注释行数目</td>
+</tr>
+<tr>
+<td><strong>F88</strong></td>
+<td>class_*</td>
+<td>类中注释行长度与代码行长度的比值</td>
+</tr>
+</tbody>
+</table>
+<p><strong> Warning Characteristics </strong></p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>特征名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F90</td>
+<td>warning_type</td>
+<td>警告的类型（漏洞模式）</td>
+</tr>
+<tr>
+<td>F91</td>
+<td>warning_priority</td>
+<td>警告的优先度</td>
+</tr>
+<tr>
+<td>F92</td>
+<td>warning_rank</td>
+<td>警告的威胁等级</td>
+</tr>
+<tr>
+<td>F94</td>
+<td>warning_num_method</td>
+<td>同一个方法中的警告数目</td>
+</tr>
+<tr>
+<td>F95</td>
+<td>warning_num_class</td>
+<td>同一个类中的警告数目</td>
+</tr>
+<tr>
+<td>F96</td>
+<td>warning_num_package</td>
+<td>同一个包中的警告数目</td>
+</tr>
+</tbody>
+</table>
+<p><strong> Warning Combination </strong></p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>特征名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F112</td>
+<td>warning_pattern_likelihood</td>
+<td>此模式中的警告是误报的概率</td>
+</tr>
+<tr>
+<td>F113</td>
+<td>warning_likelihood_variance</td>
+<td>F112概率的方差</td>
+</tr>
+<tr>
+<td>F114</td>
+<td>warning_type_likelihood</td>
+<td>此类型中的警告是误报的概率</td>
+</tr>
+<tr>
+<td>F115</td>
+<td>warning_discretization</td>
+<td>F112概率的离散化程度</td>
+</tr>
+</tbody>
+</table>
+<p>可进一步细分为多个二值化子特征的特征以加粗格式显示。</p>
+
+
+
+    </div>
+
+  </div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/" class="btn btn-neutral float-left" title="项目下载与警告扫描"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../%E8%AD%A6%E5%91%8A%E6%A0%87%E8%AE%B0/" class="btn btn-neutral float-right" title="警告正误报标记">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../%E4%B8%8B%E8%BD%BD%E6%89%AB%E6%8F%8F/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../%E8%AD%A6%E5%91%8A%E6%A0%87%E8%AE%B0/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+section.wy-nav-content-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.wy-nav-content {
+  max-width: 1100px;
+  flex: 4;
+}
