@@ -1,6 +1,6 @@
 # 基于主动学习的警告排序优化实验/系统
 
-![](https://img.shields.io/badge/platform-linux-lightgrey) ![](https://img.shields.io/badge/python-%3E%3D3.8-blue) ![](https://img.shields.io/badge/java-%3E%3D8-blue)
+![](https://img.shields.io/badge/platform-linux-lightgrey) ![](https://img.shields.io/badge/python-%3E%3D3.8-blue) ![](https://img.shields.io/badge/java-%3E%3D8-blue) ![](https://img.shields.io/tokei/lines/github/nju161250102/Thesis_2022)
 
 
 

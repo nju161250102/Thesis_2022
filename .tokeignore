@@ -1,0 +1,8 @@
+doc/
+site/
+README.md
+Dockerfile
+java/pom.xml
+java/src/main/resources/
+python/.git*
+python/static/
