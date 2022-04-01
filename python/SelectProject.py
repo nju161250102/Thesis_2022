@@ -1,6 +1,13 @@
 """
 实验项目筛选脚本
-筛选结果保存在数据目录下的 project.json 和 maven.csv
+
+直接运行，筛选结果保存在数据目录下的`project.csv`和`maven.csv`中。
+
+- `project.csv`: 项目名、项目地址、Star数、创建时间、更新时间
+- `maven.csv`: 项目名、子项目名、版本总数、实验选择范围内的版本数目
+
+Maven仓库中各项目下有大量子项目，逐个筛选耗费时间，因此除原项目名外，
+以特定后缀查找候选子项目，包括`-common`和`-core`。
 """
 import pandas as pd
 

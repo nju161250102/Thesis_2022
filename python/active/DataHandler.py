@@ -14,8 +14,8 @@ class DataHandler(object):
         # 数据预处理
         self.preprocess_dict = {
             MinMaxScaler(feature_range=(-1, 1)): [FeatureType.F21, FeatureType.F32, FeatureType.F92],
-            PowerTransformer(method="box-cox"): [FeatureType.F19, FeatureType.F20, FeatureType.F33],
-            PowerTransformer(method="yeo-johnson"): [FeatureType.F22],
+            # PowerTransformer(method="box-cox"): [FeatureType.F19, FeatureType.F20, FeatureType.F33],
+            # PowerTransformer(method="yeo-johnson"): [FeatureType.F22],
             StandardScaler(): [FeatureType.F28, FeatureType.F29, FeatureType.F31, FeatureType.F94, FeatureType.F95, FeatureType.F96],
             FunctionTransformer(func=np.frompyfunc(WarningType.to_int, 1, 1),
                                 inverse_func=np.frompyfunc(WarningType.parse, 1, 1),

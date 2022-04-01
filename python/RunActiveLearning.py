@@ -1,10 +1,13 @@
+""" 单项目主动学习实验脚本 """
+import sys
+
 from active import ActiveLearningModel
 from pic import draw_detected_rate
 from utils import DataUtils, PathUtils
 
 
 if __name__ == "__main__":
-    project_name = "lucene-core"#sys.argv[1]
+    project_name = sys.argv[1]
     config = {
         "init_sample": {
             "name": "random",
@@ -23,7 +26,7 @@ if __name__ == "__main__":
             "name": "never"
         }
     }
-    project_config = DataUtils.read_project_config("lucene-core")
+    project_config = DataUtils.read_project_config(project_name)
     for version, pre_df, cur_df in DataUtils.iter_version_df(project_config):
         pre_feature_df = DataUtils.to_feature_df(project_config, pre_df.index)
         cur_feature_df = DataUtils.to_feature_df(project_config, cur_df.index)

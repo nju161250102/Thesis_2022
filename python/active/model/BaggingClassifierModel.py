@@ -102,7 +102,7 @@ class BaggingClassifierModel(ModelBase):
 
     def __init__(self):
         super().__init__("bagging")
-        self.model = BaggingClassifier(bootstrap=False, n_estimators=20, max_samples=0.1)
+        self.model = BaggingClassifier(bootstrap=False, n_estimators=20, max_samples=0.2)
 
     def train(self, x_data: np.ndarray, x_label: np.ndarray):
         _original_function = bagging._parallel_build_estimators

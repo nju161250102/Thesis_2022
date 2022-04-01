@@ -93,12 +93,16 @@ class ActiveLearningModel(object):
             x_data, y_label, _ = self.data_handler.preprocess(self.data_df, True)
             prob_series = pd.Series(self.learn_model.predict_prob(x_data), self.data_df.index)
             prob_series.sort_values(inplace=True, ascending=True)
-            labeled_index_set = set(prob_series.iloc[:self.config["init_sample"]["sample_num"]].index)
-
+            # 向后标记直到0，1均有，暂时未使用用户审核结果
+            for i in range(1, len(prob_series)):
+                if 1 < self.data_df.loc[prob_series.iloc[:i + 1].index, "label"].sum() < i:
+                    labeled_index_set = set(prob_series.iloc[:i + 1].index)
+                    break
+            else:
+                labeled_index_set = set(prob_series.index)
         except NotFittedError:
             # 初始化采样标记一部分数据
             labeled_index_set = set(self.init_sample.get_sample_index(self.data_df))
-
         LOG.info(len(labeled_index_set))
         # 剩下的为未标记数据
         unlabeled_index_set = set(self.data_df.index.tolist()) - labeled_index_set
@@ -154,7 +158,7 @@ class ActiveLearningModel(object):
             data_df.sort_values("rank_score", ascending=False, inplace=True)
             return data_df["label"].to_list()
 
-    def _build_init_sample(self) -> InitSampleBase:
+    def _build_init_sample(self, ) -> InitSampleBase:
         """
         设置初始化采样策略
         """
@@ -180,6 +184,8 @@ class ActiveLearningModel(object):
             return BaggingClassifierModel()
         elif config["name"] == "stacking":
             return StackingClassifierModel()
+        elif config["name"] == "boosting":
+            return BoostingClassifierModel()
         return MultiplyClassifierModel(config["name"])
 
     def _build_query_strategy(self):

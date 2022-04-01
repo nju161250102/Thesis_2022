@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
@@ -15,7 +15,8 @@ class MultiplyClassifierModel(ModelBase):
 
     def __init__(self, name: str):
         model_dict = {
-            "svm": CalibratedClassifierCV(base_estimator=LinearSVC(max_iter=20000)),
+            # "svm": CalibratedClassifierCV(base_estimator=LinearSVC(max_iter=20000, tol=0.01), cv=2),
+            "svm": SVC(C=0.8, max_iter=2000, tol=0.001, probability=True),
             "dt": DecisionTreeClassifier(),
             "nb": GaussianNB(),
             "mlp": MLPClassifier(max_iter=1000)

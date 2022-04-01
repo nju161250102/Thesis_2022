@@ -8,6 +8,9 @@ from .BaseLineModel import BaseLineModel
 
 
 class BaseLineB(BaseLineModel):
+    """
+    实验来源：EFindBugs Effective Error Ranking for FindBugs
+    """
 
     def __init__(self, train_df: pd.DataFrame, test_df: pd.DataFrame):
         self.pattern_dict = defaultdict(lambda a: {"D": 0})

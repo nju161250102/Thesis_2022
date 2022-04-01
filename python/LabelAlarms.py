@@ -1,4 +1,8 @@
-""" 项目警告误报标记脚本 """
+"""
+项目警告误报标记脚本
+
+直接运行，为`report`文件夹下的所有警告文件添加正误报标签
+"""
 import pandas as pd
 
 from Logger import LOG

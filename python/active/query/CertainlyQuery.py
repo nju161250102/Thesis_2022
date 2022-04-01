@@ -14,7 +14,7 @@ class CertainlyQuery(QueryBase):
 
     def query(self, labeled_index_set: set, predict_prob: pd.Series) -> pd.Index:
         unlabeled_index_set = set(self.data_df.index.to_list()) - labeled_index_set
-        unlabeled_prob = predict_prob[unlabeled_index_set]
+        unlabeled_prob = predict_prob[list(unlabeled_index_set)]
         unlabeled_prob.sort_values(inplace=True, key=lambda p: - abs(p - 0.5))
         if len(unlabeled_prob) > self.max_num:
             return unlabeled_prob.iloc[:self.max_num].index

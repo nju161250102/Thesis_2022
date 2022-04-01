@@ -11,7 +11,15 @@ from .AlarmMatching import AlarmMatching
 
 class AlarmClassifier(object):
     """
-    警告分类器：用于标注正误报
+    警告分类：用于标注正误报
+
+    参考文献：A Model Building Process for Identifying Actionable Static Analysis Alerts
+
+    分类规则：
+
+    1. 当前警告在之后的版本中不存在，标为正报；
+    2. 当前警告因为文件删除不再存在，标为不确定；
+    3. 剩余的警告标为误报。
     """
 
     def __init__(self, alarm_df: pd.DataFrame, versions: List[str], project_name: str):

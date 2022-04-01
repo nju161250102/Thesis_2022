@@ -8,6 +8,11 @@ from .BaseLineModel import BaseLineModel
 
 
 class BaseLineA(BaseLineModel):
+    """
+    根据论文中的公式计算警告的ATA和CL值进行排序。
+
+    实验来源：Adaptively Ranking Alerts Generated from Automated Static Analysis
+    """
 
     def __init__(self, train_df: pd.DataFrame, test_df: pd.DataFrame):
         super(BaseLineA, self).__init__("ATA", train_df, test_df)

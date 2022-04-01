@@ -31,7 +31,10 @@ def search_all_versions() -> Dict[str, ProjectConfig]:
 
 def search_versions(project_url: str) -> ProjectConfig:
     """
-    搜索仓库路径下各版本的信息
+    搜索仓库路径下各版本的信息，过滤条件：
+
+    - 存在源码Jar包和编译后的Jar包
+    - 上传时间范围在2019-01-01到2020-12-31之间
     :param project_url: 必须以 / 结尾
     :return: 项目对应的配置数据
     """

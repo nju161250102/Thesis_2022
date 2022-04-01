@@ -13,11 +13,6 @@
     "javaToolsPath": "",
     // 扫描的仓库名和相应设置
     "mavenURL": {
-        "flink": {
-            "url": "https://repo1.maven.org/maven2/org/apache/flink/flink-core/",
-            // 保留时间段范围的版本，可删除
-            "startDate": "2019-01-01",
-            "endDate": "2020-12-31"
-        }
+        "flink": "https://repo1.maven.org/maven2/org/apache/flink/flink-core/",
     }
 }

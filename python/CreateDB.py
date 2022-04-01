@@ -1,3 +1,15 @@
+"""
+创建数据库脚本
+
+在当前目录下创建`default.db`，如果已存在则会清空。可以通过`-i`选项从实验的结果中导入数据。
+
+短选项 | 长选项 | 参数 | 含义 | 默认值
+----- | ----- | --- | --- | -----
+-i | --import-data  | | 是否从实验数据中导入 | 不使用为False
+-w | --worker  | WORKER_NUM | 随机工人数目 | 10
+
+"""
+import argparse
 import sqlite3
 import random
 from faker import Faker
@@ -8,7 +20,7 @@ faker = Faker()
 
 
 def refresh():
-    conn = sqlite3.connect("my.db")
+    conn = sqlite3.connect("default.db")
     c = conn.cursor()
     c.execute("DROP TABLE IF EXISTS worker;")
     c.execute('''
@@ -137,8 +149,15 @@ def generate_alarm(project_config, version_dict, time_dict, last_state: int, wor
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create Database")
+    parser.add_argument("-i", "--import-data", action="store_true",
+                        help="Use this option to import data from experiments result")
+    parser.add_argument("-w", "--worker", action="store", default=10, type=int,
+                        help="The number of workers")
+    args = parser.parse_args()
+
     # 设置工人的数目
-    _worker_num = 10
+    _worker_num = args.worker
     # 设置检测中状态项目的数目
     _scan_num = 1
     # 所有项目配置
@@ -147,15 +166,16 @@ if __name__ == "__main__":
     _scan_projects = random.sample(_config_dict.keys(), _scan_num)
 
     refresh()
-    generate_worker(_worker_num)
-    for name, _project_config in _config_dict.items():
-        _last_state = 2
-        # 指定项目的最后一个版本设定为检测中
-        if name in _scan_projects:
-            _last_state = 0
-        # 否则50%的概率设定为审核中，其余为审核完成
-        elif faker.pybool():
-            _last_state = 1
-        _version_dict, _time_dict = generate_project(_project_config, _last_state)
-        generate_alarm(_project_config, _version_dict, _time_dict, _last_state, _worker_num)
+    if args.import_data:
+        generate_worker(_worker_num)
+        for name, _project_config in _config_dict.items():
+            _last_state = 2
+            # 指定项目的最后一个版本设定为检测中
+            if name in _scan_projects:
+                _last_state = 0
+            # 否则50%的概率设定为审核中，其余为审核完成
+            elif faker.pybool():
+                _last_state = 1
+            _version_dict, _time_dict = generate_project(_project_config, _last_state)
+            generate_alarm(_project_config, _version_dict, _time_dict, _last_state, _worker_num)
 

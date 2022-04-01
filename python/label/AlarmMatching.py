@@ -8,6 +8,17 @@ from utils import PathUtils
 
 
 class AlarmMatching(object):
+    """
+    警告匹配：用于找出不同版本之间相同的警告。
+
+    参考文献：Tracking static analysis violations over time to capture developer characteristics
+
+    相邻版本、相同类型的警告之间按下列顺序匹配：
+
+    1. 同一文件中按diff分组的位置匹配；
+    2. 同一文件中按片段匹配；
+    3. 不同文件中按前后代码单词序列的Hash值匹配。
+    """
 
     def __init__(self, project_name: str):
         self.project_name = project_name

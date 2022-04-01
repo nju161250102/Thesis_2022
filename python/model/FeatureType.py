@@ -19,7 +19,57 @@ class _FeatureType(object):
 
 class FeatureType(object):
     """
-    保存代码中使用的所有特征类型，变量名以F开头
+    保存代码中使用的所有特征类型，变量名以F开头。
+
+    特征编号参考论文：Is there a golden feature set for static warning identification?
+    注意，原论文中的文件级别均被替换为类级别。
+
+    ** Code Characteristic **
+
+    序号 | 特征名 | 含义
+    ----- | ----- | ---
+    F19 | code_method_statement | 方法中不含有注释的语句数目
+    F20 | code_class_statement | 类中不含有注释的语句数目
+    F21 | code_package_statement | 包中不含有注释的语句数目
+    F22 | code_class_comment   | 类中的注释行数目
+    F23 | code_class_comment_ratio | 类中注释行长度与代码行长度的比值
+    F28 | code_class_method | 类中包含的方法数目
+    F29 | code_package_method | 包中包含的方法数目
+    F31 | code_package_class   | 包中包含的类的数目
+    F32 | code_package_class   | 警告行的缩进空格数目
+    F33 | code_package_class   | 方法内代码的圈复杂度
+
+    ** Code Analysis **
+
+    序号 | 特征名 | 含义
+    ----- | ----- | ---
+    **F84** | method_visibility_* | 方法中不含有注释的语句数目
+    F85 | return_type | 类中不含有注释的语句数目
+    **F86** | method_* | 包中不含有注释的语句数目
+    **F87** | class_visibility_*   | 类中的注释行数目
+    **F88** | class_* | 类中注释行长度与代码行长度的比值
+
+    ** Warning Characteristics **
+
+    序号 | 特征名 | 含义
+    ----- | ----- | ---
+    F90 | warning_type | 警告的类型（漏洞模式）
+    F91 | warning_priority | 警告的优先度
+    F92 | warning_rank | 警告的威胁等级
+    F94 | warning_num_method   | 同一个方法中的警告数目
+    F95 | warning_num_class | 同一个类中的警告数目
+    F96 | warning_num_package | 同一个包中的警告数目
+
+    ** Warning Combination **
+
+    序号 | 特征名 | 含义
+    ----- | ----- | ---
+    F112 | warning_pattern_likelihood | 此模式中的警告是误报的概率
+    F113 | warning_likelihood_variance | F112概率的方差
+    F114 | warning_type_likelihood | 此类型中的警告是误报的概率
+    F115 | warning_discretization   | F112概率的离散化程度
+
+    可进一步细分为多个二值化子特征的特征以加粗格式显示。
     """
 
     @staticmethod
