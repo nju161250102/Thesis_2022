@@ -1,7 +1,9 @@
 """
 项目警告特征提取脚本
-如果特征文件已存在会覆盖
-暂时废弃：添加 reduce 参数减少重复数据 :see reduce_alarms
+
+生成的特征文件保存在数据目录的`feature`文件夹下，以项目名作为文件名，如果特征文件已存在会覆盖。
+
+已废弃：添加 reduce 参数减少重复数据
 """
 import sys
 import pandas as pd
